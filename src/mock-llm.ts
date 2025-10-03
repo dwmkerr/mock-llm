@@ -23,7 +23,7 @@ export interface Config {
 }
 
 // Register Handlebars helper for JMESPath queries
-Handlebars.registerHelper('jmes', (obj: any, path: string) => {
+Handlebars.registerHelper('jmes', (obj: unknown, path: string) => {
   return jmespath.search(obj, path);
 });
 
