@@ -1,6 +1,6 @@
 {
   "name": "@dwmkerr/mock-llm",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Simple OpenAI compatible Mock API server. Useful for deterministic testing of AI applications.",
   "main": "dist/server.js",
   "bin": {
