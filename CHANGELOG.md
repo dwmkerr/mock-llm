@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.1...mock-llm-v0.1.2) (2025-10-03)
+
+
+### Bug Fixes
+
+* skip prepare script in Docker production stage ([6fb69e6](https://github.com/dwmkerr/mock-llm/commit/6fb69e6a7c51387ebf427d5bd351bfb914f55f6a))
+* upgrade dependencies to fix security vulnerabilities ([2b7f39e](https://github.com/dwmkerr/mock-llm/commit/2b7f39ebd0b3dd61389082f530e01b76dc406ca3))
+
 ## [0.1.1](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.0...mock-llm-v0.1.1) (2025-10-03)
 
 
