@@ -23,6 +23,9 @@
   ],
   "author": "Dave Kerr",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "handlebars": "^4.7.8",
