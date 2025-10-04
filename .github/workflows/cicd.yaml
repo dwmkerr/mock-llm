@@ -15,7 +15,7 @@ env:
   NODE_VERSION: "24.x"
 
 jobs:
-  check-release:
+  build-and-test:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +56,7 @@ jobs:
           fail_ci_if_error: false
 
   release:
-    needs: [check-release]
+    needs: [build-and-test]
     runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/main'
     outputs:
