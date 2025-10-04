@@ -36,6 +36,13 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./artifacts/coverage
+          fail_ci_if_error: false
+
   release:
     needs: [check-release]
     runs-on: ubuntu-24.04

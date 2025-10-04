@@ -4,4 +4,5 @@ dist/
 .DS_Store
 mock-llm.yaml
 coverage/
+artifacts/
 *.tsbuildinfo
