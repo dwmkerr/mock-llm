@@ -36,11 +36,23 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Upload coverage to Codecov
+      - name: Upload unit test coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./artifacts/coverage
+          files: ./artifacts/coverage/lcov.info
+          flags: unittests
+          fail_ci_if_error: false
+
+      - name: Test samples
+        run: npm run test:samples
+
+      - name: Upload sample test coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./artifacts/coverage-samples/lcov.info
+          flags: samples
           fail_ci_if_error: false
 
   release:

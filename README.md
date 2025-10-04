@@ -1,5 +1,9 @@
 # mock-llm
 
+[![npm version](https://badge.fury.io/js/@dwmkerr%2Fmock-llm.svg)](https://badge.fury.io/js/@dwmkerr%2Fmock-llm)
+[![codecov](https://codecov.io/gh/dwmkerr/mock-llm/graph/badge.svg?flag=unittests)](https://codecov.io/gh/dwmkerr/mock-llm?flag=unittests)
+[![codecov](https://codecov.io/gh/dwmkerr/mock-llm/graph/badge.svg?flag=samples)](https://codecov.io/gh/dwmkerr/mock-llm?flag=samples)
+
 Simple OpenAI compatible Mock API server. Useful for deterministic testing of AI applications.
 
 ## Introduction
@@ -190,6 +194,10 @@ For Docker you can mount a local file into the container:
 ```bash
 docker run -v $(pwd)/mock-llm.yaml:/app/mock-llm.yaml -p 8080:8080 ghcr.io/dwmkerr/mock-llm
 ```
+
+### Updating Configuration
+
+Configuration can be updated at runtime via the `/config` endpoint: `GET` returns current config, `POST` replaces it, `PATCH` merges updates, `DELETE` resets to default.
 
 ### Template Variables
 

@@ -1,32 +1,88 @@
-#!/usr/bin/env node
-
 import express from 'express';
-import * as path from 'path';
-import { loadConfig, handleRequest, ChatRequest } from './mock-llm';
+import * as jmespath from 'jmespath';
+import Handlebars from 'handlebars';
+import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
+import { Config, Rule } from './config';
 
-const HOST = process.env.HOST || '0.0.0.0';
-const PORT = parseInt(process.env.PORT || '8080', 10);
+export function createServer(initialConfig: Config) {
+  //  Track the current config, which can be changed via '/config' endpoints.
+  let currentConfig = { ...initialConfig };
 
-// Parse --config argument
-const configArgIndex = process.argv.indexOf('--config');
-const configPath = configArgIndex !== -1 ? process.argv[configArgIndex + 1] : undefined;
+  // Register Handlebars helpers - 'jmes' runs a JSON JMES expression and
+  // 'timestamp' returns the current time.
+  Handlebars.registerHelper('jmes', (obj: unknown, path: string) => {
+    return jmespath.search(obj, path);
+  });
+  Handlebars.registerHelper('timestamp', () => {
+    return Date.now().toString();
+  });
 
-const config = loadConfig(configPath);
-const configPathUsed = configPath || path.join(process.cwd(), 'mock-llm.yaml');
-console.log(`Loaded configuration from ${configPathUsed} - ${config.rules.length} rule(s)`);
+  //  Create the app, log requests.
+  const app = express();
+  app.use(express.json());
+  app.use((req, _, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+  });
 
-const app = express();
-app.use(express.json());
+  //  Handle config requests (get/replace/update/delete).
+  app.get('/config', (req, res) => {
+    res.json(currentConfig);
+  });
+  app.post('/config', (req, res) => {
+    currentConfig = req.body;
+    console.log(`config replaced - ${currentConfig.rules.length} rule(s)`);
+    res.json(currentConfig);
+  });
+  app.patch('/config', (req, res) => {
+    currentConfig = { ...currentConfig, ...req.body };
+    console.log(`config updated - ${currentConfig.rules.length} rule(s)`);
+    res.json(currentConfig);
+  });
+  app.delete('/config', (req, res) => {
+    currentConfig = { ...initialConfig };
+    console.log(`config reset - ${currentConfig.rules.length} rule(s)`);
+    res.json(currentConfig);
+  });
 
-app.post(/.*/, (req, res) => {
-  console.log(`${req.method} ${req.path}`);
+  //  Handle chat completion requests.
+  app.post(/.*/, (req, res) => {
+    const request: ChatCompletionCreateParamsBase = req.body;
 
-  const request: ChatRequest = req.body;
-  const response = handleRequest(config, request, req.path);
+    //  Filter rules by path (typically 'v1/completions').
+    //  If no rules for this path we fail.
+    const matchingPathRules = currentConfig.rules.filter(rule =>
+      new RegExp(rule.path).test(req.path)
+    );
+    if (matchingPathRules.length === 0) {
+      return res.status(500).json({ error: `No matching rule found for path: ${req.path}` });
+    }
 
-  res.status(response.status).json(JSON.parse(response.body));
-});
+    //  Find all rules that match the JMESPath expression. If no rules match
+    //  then we fail.
+    const matchingRules: Rule[] = [];
+    for (const rule of matchingPathRules) {
+      try {
+        const result = jmespath.search(request, rule.match);
+        if (result) {
+          matchingRules.push(rule);
+        }
+      } catch (error) {
+        return res.status(500).json({
+          error: `Error evaluating match expression: ${rule.match}\n${error}`
+        });
+      }
+    }
+    if (matchingRules.length === 0) {
+      return res.status(500).json({ error: 'No matching rule found for request' });
+    }
 
-app.listen(PORT, HOST, () => {
-  console.log(`mock-llm server running on ${HOST}:${PORT}`);
-});
+    //  Render the response, expanding any expressions from the matched rule.
+    const matchedRule = matchingRules[matchingRules.length - 1];
+    const template = Handlebars.compile(matchedRule.response.content);
+    const body = template({ request });
+    return res.status(matchedRule.response.status).json(JSON.parse(body));
+  });
+
+  return app;
+}
