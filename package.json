@@ -2,16 +2,17 @@
   "name": "@dwmkerr/mock-llm",
   "version": "0.1.3",
   "description": "Simple OpenAI compatible Mock API server. Useful for deterministic testing of AI applications.",
-  "main": "dist/server.js",
+  "main": "dist/main.js",
   "bin": {
-    "mock-llm": "./dist/server.js"
+    "mock-llm": "./dist/main.js"
   },
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "tsx watch src/server.ts",
-    "test": "jest --coverage --coverageDirectory=./artifacts/coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=text-summary",
+    "start": "node dist/main.js",
+    "dev": "tsx watch src/main.ts",
+    "test": "jest --coverage --coverageDirectory=./artifacts/coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=text-summary --testPathIgnorePatterns=test-samples.spec.ts",
+    "test:samples": "npm run build && jest --roots='<rootDir>' --testMatch='**/test-samples.spec.ts' --coverage --coverageDirectory=./artifacts/coverage-samples --coverageReporters=text --coverageReporters=lcov --coverageReporters=text-summary",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix"
   },
