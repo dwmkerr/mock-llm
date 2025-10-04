@@ -1,5 +1,6 @@
 import express from 'express';
 import * as jmespath from 'jmespath';
+import * as yaml from 'js-yaml';
 import Handlebars from 'handlebars';
 import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 import { Config, Rule } from './config';
@@ -20,6 +21,7 @@ export function createServer(initialConfig: Config) {
   //  Create the app, log requests.
   const app = express();
   app.use(express.json());
+  app.use(express.text({ type: 'application/x-yaml' }));
   app.use((req, _, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
@@ -30,12 +32,17 @@ export function createServer(initialConfig: Config) {
     res.json(currentConfig);
   });
   app.post('/config', (req, res) => {
-    currentConfig = req.body;
+    currentConfig = typeof req.body === 'string'
+      ? yaml.load(req.body) as Config
+      : req.body;
     console.log(`config replaced - ${currentConfig.rules.length} rule(s)`);
     res.json(currentConfig);
   });
   app.patch('/config', (req, res) => {
-    currentConfig = { ...currentConfig, ...req.body };
+    const update = typeof req.body === 'string'
+      ? yaml.load(req.body) as Config
+      : req.body;
+    currentConfig = { ...currentConfig, ...update };
     console.log(`config updated - ${currentConfig.rules.length} rule(s)`);
     res.json(currentConfig);
   });

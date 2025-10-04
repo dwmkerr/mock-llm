@@ -197,7 +197,7 @@ docker run -v $(pwd)/mock-llm.yaml:/app/mock-llm.yaml -p 8080:8080 ghcr.io/dwmke
 
 ### Updating Configuration
 
-Configuration can be updated at runtime via the `/config` endpoint: `GET` returns current config, `POST` replaces it, `PATCH` merges updates, `DELETE` resets to default.
+Configuration can be updated at runtime via the `/config` endpoint: `GET` returns current config, `POST` replaces it, `PATCH` merges updates, `DELETE` resets to default. Both `POST` and `PATCH` accept JSON (`Content-Type: application/json`) or YAML (`Content-Type: application/x-yaml`).
 
 ### Template Variables
 
