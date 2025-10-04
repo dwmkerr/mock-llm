@@ -16,8 +16,7 @@ response=$(curl -fsSL -X POST http://localhost:8080/v1/chat/completions \
     "messages": [{"role": "user", "content": "Hello, world!"}]
   }')
 
-# Expect a completion response with an assistant message that echos the input
-# and the model.
+# Expect a completion response containing the message.
 expected='{
   "object": "chat.completion",
   "model": "gpt-4",
@@ -30,8 +29,5 @@ expected='{
   }]
 }'
 
-# Print the response, the expected, and the diff if they do not match. We ignore
-# the 'id' field in the response as it is auto-generated.
-echo -e "response:\n$(echo "$response" | jq -S)"
-echo -e "expected:\n$(echo "$expected" | jq -S)"
-diff_output=$(diff <(echo "$expected" | jq -S .) <(echo "$response" | jq -S 'del(.id)') 2>&1) && echo "passed" || { echo -e "failed - diff:\n${diff_output}"; exit 1; }
+# Fail if response doesn't match expected (ignoring generated 'id' field).
+diff_output=$(diff <(echo "$expected" | jq -S .) <(echo "$response" | jq -S 'del(.id)') 2>&1) && echo "passed" || { echo -e "failed:\n${diff_output}"; exit 1; }
