@@ -18,7 +18,7 @@ console.log(`Loaded configuration from ${configPathUsed} - ${config.rules.length
 const app = express();
 app.use(express.json());
 
-app.post('*', (req, res) => {
+app.post(/.*/, (req, res) => {
   console.log(`${req.method} ${req.path}`);
 
   const request: ChatRequest = req.body;

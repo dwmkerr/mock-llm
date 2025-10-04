@@ -2,13 +2,10 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
-
-COPY tsconfig.json ./
+COPY package*.json tsconfig.json ./
 COPY src/ ./src/
 
-RUN npm run build
+RUN npm install
 
 FROM node:24-alpine
 
