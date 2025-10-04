@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.2...mock-llm-v0.1.3) (2025-10-04)
+
+
+### Bug Fixes
+
+* resolve Express 5 routing and add coverage reporting ([edefb57](https://github.com/dwmkerr/mock-llm/commit/edefb5782996f6971f9358ea5064785b250bd0b8))
+* resolve Express 5 routing and add coverage reporting ([a10c238](https://github.com/dwmkerr/mock-llm/commit/a10c238a55bb7f45d6baac04361c899c74198c0b))
+
 ## [0.1.2](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.1...mock-llm-v0.1.2) (2025-10-03)
 
 
