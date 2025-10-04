@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.4](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.3...mock-llm-v0.1.4) (2025-10-04)
+
+
+### Features
+
+* 401 sample ([e0357f5](https://github.com/dwmkerr/mock-llm/commit/e0357f5f49bca5234b1f7deee8c7b5a5a0d526e0))
+* 401 sample ([13dacc0](https://github.com/dwmkerr/mock-llm/commit/13dacc0eb0600d76dc49c39a14a49f19d24c3a74))
+* add config API, sample tests, and refactored architecture ([d8cb72f](https://github.com/dwmkerr/mock-llm/commit/d8cb72fdc2f5c296257a0867230ececa7f41fa91))
+* merge samples and integration tests ([cd3839a](https://github.com/dwmkerr/mock-llm/commit/cd3839a84068faae678d1a0f09bad263f7a5e492))
+* samples and integration tests ([8da7f9c](https://github.com/dwmkerr/mock-llm/commit/8da7f9c9d7fc56f00e179df557991aed648b33b5))
+* samples and integration tests ([e807e79](https://github.com/dwmkerr/mock-llm/commit/e807e799aeee7c0fa5fa8244e5314c50874de3fe))
+
 ## [0.1.3](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.2...mock-llm-v0.1.3) (2025-10-04)
 
 
