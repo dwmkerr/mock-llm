@@ -1,8 +1,8 @@
 # mock-llm
 
 [![npm version](https://badge.fury.io/js/@dwmkerr%2Fmock-llm.svg)](https://badge.fury.io/js/@dwmkerr%2Fmock-llm)
-[![codecov](https://codecov.io/gh/dwmkerr/mock-llm/graph/badge.svg?flag=unittests)](https://codecov.io/gh/dwmkerr/mock-llm?flag=unittests)
-[![codecov](https://codecov.io/gh/dwmkerr/mock-llm/graph/badge.svg?flag=samples)](https://codecov.io/gh/dwmkerr/mock-llm?flag=samples)
+[![coverage - unit tests](https://img.shields.io/codecov/c/github/dwmkerr/mock-llm?flag=unittests&label=coverage%20-%20unit%20tests)](https://codecov.io/gh/dwmkerr/mock-llm?flag=unittests)
+[![coverage - samples](https://img.shields.io/codecov/c/github/dwmkerr/mock-llm?flag=samples&label=coverage%20-%20samples)](https://codecov.io/gh/dwmkerr/mock-llm?flag=samples)
 
 Simple OpenAI compatible Mock API server. Useful for deterministic testing of AI applications.
 
