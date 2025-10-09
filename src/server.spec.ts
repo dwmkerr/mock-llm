@@ -20,6 +20,20 @@ describe('server config API', () => {
     server.close(done);
   });
 
+  it('should GET /health', async () => {
+    const response = await fetch(`${baseUrl}/health`);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: 'healthy' });
+  });
+
+  it('should GET /ready', async () => {
+    const response = await fetch(`${baseUrl}/ready`);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: 'ready' });
+  });
+
   it('should GET current config as JSON by default', async () => {
     const response = await fetch(`${baseUrl}/config`);
 

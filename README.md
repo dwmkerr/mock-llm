@@ -195,6 +195,16 @@ For Docker you can mount a local file into the container:
 docker run -v $(pwd)/mock-llm.yaml:/app/mock-llm.yaml -p 8080:8080 ghcr.io/dwmkerr/mock-llm
 ```
 
+### Health & Readiness Checks
+
+```bash
+curl http://localhost:8080/health
+# {"status":"healthy"}
+
+curl http://localhost:8080/ready
+# {"status":"ready"}
+```
+
 ### Updating Configuration
 
 Configuration can be updated at runtime via the `/config` endpoint: `GET` returns current config (JSON by default, YAML with `Accept: application/x-yaml`), `POST` replaces it, `PATCH` merges updates, `DELETE` resets to default. Both `POST` and `PATCH` accept JSON (`Content-Type: application/json`) or YAML (`Content-Type: application/x-yaml`).

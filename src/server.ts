@@ -27,6 +27,14 @@ export function createServer(initialConfig: Config) {
     next();
   });
 
+  //  Health and readiness checks
+  app.get('/health', (_, res) => {
+    res.json({ status: 'healthy' });
+  });
+  app.get('/ready', (_, res) => {
+    res.json({ status: 'ready' });
+  });
+
   //  Handle config requests (get/replace/update/delete).
   app.get('/config', (req, res) => {
     // Return YAML if Accept header requests it, otherwise JSON

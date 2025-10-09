@@ -17,4 +17,4 @@ const app = createServer(config);
 
 app.listen(PORT, HOST, () => {
   console.log(`mock-llm server running on ${HOST}:${PORT}`);
-});
+}).on('error', (err) => { console.error(err); process.exit(1); });
