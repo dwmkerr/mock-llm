@@ -122,3 +122,160 @@ describe('server config API', () => {
     expect(await response.json()).toEqual(getDefaultConfig());
   });
 });
+
+describe('server error handling', () => {
+  const app = createServer(getDefaultConfig());
+  let server: ReturnType<typeof app.listen>;
+  let baseUrl: string;
+
+  beforeAll((done) => {
+    server = app.listen(0, () => {
+      const address = server.address() as { port: number };
+      baseUrl = `http://localhost:${address.port}`;
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  it('should return JSON 404 for unmatched routes', async () => {
+    const response = await fetch(`${baseUrl}/nonexistent`);
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      error: 'Not Found',
+      message: 'Cannot GET /nonexistent',
+      status: 404
+    });
+  });
+
+  it('should return JSON 400 for malformed JSON input', async () => {
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'not valid json'
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      error: 'SyntaxError',
+      status: 400,
+      message: expect.stringContaining('not valid JSON')
+    });
+  });
+
+  it('should return JSON 500 for template parsing errors', async () => {
+    const badConfig = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          match: '@',
+          response: {
+            status: 200,
+            content: '{"invalid": {{unclosed}}'
+          }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(badConfig)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'test', messages: [] })
+    });
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toMatchObject({
+      error: expect.any(String),
+      message: expect.any(String),
+      status: 500
+    });
+  });
+});
+
+describe('server jmes helper', () => {
+  const app = createServer(getDefaultConfig());
+  let server: ReturnType<typeof app.listen>;
+  let baseUrl: string;
+
+  beforeAll((done) => {
+    server = app.listen(0, () => {
+      const address = server.address() as { port: number };
+      baseUrl = `http://localhost:${address.port}`;
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  it('should return primitives as-is from jmes helper', async () => {
+    const config = {
+      rules: [{
+        path: '/v1/chat/completions',
+        match: '@',
+        response: {
+          status: 200,
+          content: '{"model":"{{jmes request model}}"}'
+        }
+      }]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ model: 'gpt-4' });
+  });
+
+  it('should JSON-stringify objects from jmes helper', async () => {
+    const config = {
+      rules: [{
+        path: '/v1/chat/completions',
+        match: '@',
+        response: {
+          status: 200,
+          content: '{"message":{{jmes request messages[0]}}}'
+        }
+      }]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [{ role: 'system', content: 'Test' }]
+      })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      message: { role: 'system', content: 'Test' }
+    });
+  });
+});
