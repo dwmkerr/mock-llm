@@ -93,7 +93,7 @@ export function createServer(initialConfig: Config) {
   });
 
   // Catch-all 404 handler
-  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((req: express.Request, res: express.Response) => {
     res.status(404).json({
       error: 'Not Found',
       message: `Cannot ${req.method} ${req.path}`,
@@ -102,7 +102,7 @@ export function createServer(initialConfig: Config) {
   });
 
   // Return JSON errors instead of HTML
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: Error & { status?: number; statusCode?: number }, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error(`Error ${err.status || err.statusCode || 500}: ${err.message}`);
     const status = err.status || err.statusCode || 500;
     res.status(status).json({
