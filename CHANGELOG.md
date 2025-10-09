@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.5](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.4...mock-llm-v0.1.5) (2025-10-09)
+
+
+### Features
+
+* add health/ready endpoints and server error handling ([d5ad72e](https://github.com/dwmkerr/mock-llm/commit/d5ad72e27704f30f68185e4cb155369d7e041ac7))
+* add YAML response support for GET /config endpoint ([7838602](https://github.com/dwmkerr/mock-llm/commit/783860216f940e82127d063d56da3485d10a369f))
+* add YAML support for config API ([f3c906f](https://github.com/dwmkerr/mock-llm/commit/f3c906fab41e7ff7e729e54c00a94b70a8ab7e1e))
+
 ## [0.1.4](https://github.com/dwmkerr/mock-llm/compare/mock-llm-v0.1.3...mock-llm-v0.1.4) (2025-10-04)
 
 
