@@ -213,7 +213,13 @@ Configuration can be updated at runtime via the `/config` endpoint: `GET` return
 
 Available in response content templates:
 
-- `{{jmes request 'path'}}` - Query the request body using JMESPath
+- `{{jmes request path}}` - Query the request body using JMESPath. Primitives (strings, numbers, booleans) are returned as-is. Objects and arrays are automatically JSON-stringified.
+- `{{timestamp}}` - Current time in milliseconds
+
+```yaml
+"model": "{{jmes request model}}"              // outputs: "model": "gpt-4"
+"message": {{jmes request messages[0]}}        // outputs: "message": {"role":"system","content":"..."}
+```
 
 ## Examples
 

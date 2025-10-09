@@ -1,22 +1,13 @@
 import express from 'express';
 import * as jmespath from 'jmespath';
 import * as yaml from 'js-yaml';
-import Handlebars from 'handlebars';
 import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 import { Config, Rule } from './config';
+import { renderTemplate } from './template';
 
 export function createServer(initialConfig: Config) {
   //  Track the current config, which can be changed via '/config' endpoints.
   let currentConfig = { ...initialConfig };
-
-  // Register Handlebars helpers - 'jmes' runs a JSON JMES expression and
-  // 'timestamp' returns the current time.
-  Handlebars.registerHelper('jmes', (obj: unknown, path: string) => {
-    return jmespath.search(obj, path);
-  });
-  Handlebars.registerHelper('timestamp', () => {
-    return Date.now().toString();
-  });
 
   //  Create the app, log requests.
   const app = express();
@@ -75,7 +66,7 @@ export function createServer(initialConfig: Config) {
       new RegExp(rule.path).test(req.path)
     );
     if (matchingPathRules.length === 0) {
-      return res.status(500).json({ error: `No matching rule found for path: ${req.path}` });
+      throw new Error(`No matching rule found for path: ${req.path}`);
     }
 
     //  Find all rules that match the JMESPath expression. If no rules match
@@ -88,20 +79,37 @@ export function createServer(initialConfig: Config) {
           matchingRules.push(rule);
         }
       } catch (error) {
-        return res.status(500).json({
-          error: `Error evaluating match expression: ${rule.match}\n${error}`
-        });
+        throw new Error(`Error evaluating match expression: ${rule.match}\n${error}`);
       }
     }
     if (matchingRules.length === 0) {
-      return res.status(500).json({ error: 'No matching rule found for request' });
+      throw new Error('No matching rule found for request');
     }
 
     //  Render the response, expanding any expressions from the matched rule.
     const matchedRule = matchingRules[matchingRules.length - 1];
-    const template = Handlebars.compile(matchedRule.response.content);
-    const body = template({ request });
+    const body = renderTemplate(matchedRule.response.content, { request });
     return res.status(matchedRule.response.status).json(JSON.parse(body));
+  });
+
+  // Catch-all 404 handler
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.status(404).json({
+      error: 'Not Found',
+      message: `Cannot ${req.method} ${req.path}`,
+      status: 404
+    });
+  });
+
+  // Return JSON errors instead of HTML
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error(`Error ${err.status || err.statusCode || 500}: ${err.message}`);
+    const status = err.status || err.statusCode || 500;
+    res.status(status).json({
+      error: err.name || 'Error',
+      message: err.message,
+      status
+    });
   });
 
   return app;

@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "express": "^5.1.0",
-    "handlebars": "^4.7.8",
     "jmespath": "^0.16.0",
     "js-yaml": "^4.1.0",
     "openai": "^4.28.0"

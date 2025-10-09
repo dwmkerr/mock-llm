@@ -28,11 +28,11 @@ export function getDefaultConfig(): Config {
           content: `{
   "id": "chatcmpl-{{timestamp}}",
   "object": "chat.completion",
-  "model": "{{jmes request 'model'}}",
+  "model": "{{jmes request model}}",
   "choices": [{
     "message": {
       "role": "assistant",
-      "content": "{{jmes request 'messages[-1].content'}}"
+      "content": "{{jmes request messages[-1].content}}"
     },
     "finish_reason": "stop"
   }]
