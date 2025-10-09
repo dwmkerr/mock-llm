@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.8](https://github.com/dwmkerr/mock-llm/compare/v0.1.7...v0.1.8) (2025-10-09)
+
+
+### Bug Fixes
+
+* replace Handlebars with custom template engine for JMESPath compatibility ([96f37a8](https://github.com/dwmkerr/mock-llm/commit/96f37a8acb015e4d03c6e68401831334f63a794a))
+* replace Handlebars with custom template engine for JMESPath compatibility ([b729d19](https://github.com/dwmkerr/mock-llm/commit/b729d19bfb84a50e65786d03164c5800108ce9ec))
+* resolve lint errors in error handlers ([2f1b85d](https://github.com/dwmkerr/mock-llm/commit/2f1b85d74fc1d0446fa97f52074f7a323b9fa534))
+
 ## [0.1.7](https://github.com/dwmkerr/mock-llm/compare/v0.1.5...v0.1.7) (2025-10-09)
 
 
