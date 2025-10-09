@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import * as yaml from 'js-yaml';
 import { createServer } from './server';
 import { getDefaultConfig } from './config';
 
@@ -19,11 +20,23 @@ describe('server config API', () => {
     server.close(done);
   });
 
-  it('should GET current config', async () => {
+  it('should GET current config as JSON by default', async () => {
     const response = await fetch(`${baseUrl}/config`);
 
     expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('application/json');
     expect(await response.json()).toEqual(getDefaultConfig());
+  });
+
+  it('should GET current config as YAML when requested', async () => {
+    const response = await fetch(`${baseUrl}/config`, {
+      headers: { 'Accept': 'application/x-yaml' }
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('application/x-yaml');
+    const yamlText = await response.text();
+    expect(yaml.load(yamlText)).toEqual(getDefaultConfig());
   });
 
   it('should POST to replace config', async () => {

@@ -29,7 +29,12 @@ export function createServer(initialConfig: Config) {
 
   //  Handle config requests (get/replace/update/delete).
   app.get('/config', (req, res) => {
-    res.json(currentConfig);
+    // Return YAML if Accept header requests it, otherwise JSON
+    if (req.get('Accept') === 'application/x-yaml') {
+      res.type('application/x-yaml').send(yaml.dump(currentConfig));
+    } else {
+      res.json(currentConfig);
+    }
   });
   app.post('/config', (req, res) => {
     currentConfig = typeof req.body === 'string'
