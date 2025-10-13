@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.9](https://github.com/dwmkerr/mock-llm/compare/v0.1.8...v0.1.9) (2025-10-13)
+
+
+### Features
+
+* add Helm chart for Kubernetes deployment ([2bca413](https://github.com/dwmkerr/mock-llm/commit/2bca41323e6e427b7d302a259d832ecbd01d0461))
+* add Helm chart for Kubernetes deployment ([b007f0b](https://github.com/dwmkerr/mock-llm/commit/b007f0b976836f8252379d441a829b44ee5fe4fc))
+* add Helm chart validation and publishing to CI/CD ([e6e3e83](https://github.com/dwmkerr/mock-llm/commit/e6e3e83faed5017d26385229aea6c81436583d50))
+* configure release-please to update Helm chart version ([e39b4e9](https://github.com/dwmkerr/mock-llm/commit/e39b4e91f4d8073ba195b3802733a121c0d173bf))
+
+
+### Bug Fixes
+
+* address security findings in Helm chart ([39e18f5](https://github.com/dwmkerr/mock-llm/commit/39e18f519d235314e24daf8feadcbb7153dcad31))
+
 ## [0.1.8](https://github.com/dwmkerr/mock-llm/compare/v0.1.7...v0.1.8) (2025-10-09)
 
 
