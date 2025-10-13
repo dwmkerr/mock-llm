@@ -1,0 +1,17 @@
+apiVersion: v2
+name: mock-llm
+description: A Helm chart for mock-llm - Simple OpenAI compatible Mock API server
+type: application
+version: 0.1.8
+appVersion: 0.1.8
+keywords:
+  - openai
+  - mock
+  - testing
+  - llm
+home: https://github.com/dwmkerr/mock-llm
+sources:
+  - https://github.com/dwmkerr/mock-llm
+maintainers:
+  - name: dwmkerr
+    url: https://github.com/dwmkerr
