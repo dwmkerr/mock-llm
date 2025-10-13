@@ -12,6 +12,20 @@ Creating integration tests for AI applications that rely on LLMs can be challeng
 
 The server can be configured to provide different responses based on the input, which can be useful for testing error scenarios, different payloads, etc. It is currently designed to mock the [OpenAI Completions API](https://platform.openai.com/docs/api-reference/completions) but could be extended to mock the list models APIs, responses APIs, A2A apis and so on in the future.
 
+<!-- vim-markdown-toc GFM -->
+
+- [Quickstart](#quickstart)
+- [Configuration](#configuration)
+    - [Customising Responses](#customising-responses)
+    - [Loading Configuration Files](#loading-configuration-files)
+    - [Updating Configuration](#updating-configuration)
+    - [Health & Readiness Checks](#health--readiness-checks)
+    - [Template Variables](#template-variables)
+- [Examples](#examples)
+- [Developer Guide](#developer-guide)
+
+<!-- vim-markdown-toc -->
+
 ## Quickstart
 
 Install and run:
@@ -57,7 +71,7 @@ Response:
 
 ## Configuration
 
-Responses are configured using a `yaml` file loaded from `mock-llm.yaml` in the current working directory. Rules are evaluated in order - last match wins. Start with general rules and add specific overrides.
+Responses are configured using a `yaml` file loaded from `mock-llm.yaml` in the current working directory. Rules are evaluated in order - last match wins.
 
 The default configuration echoes the last user message:
 
@@ -88,28 +102,11 @@ rules:
 
 [JMESPath](https://jmespath.org/) is a query language for JSON used to match incoming requests and extract values for responses.
 
-Return a fixed message when input contains `hello`:
+This returns a fixed message for `hello` and simulates a `401` error for `error-401`, and simulates `v1/models`:
 
 ```yaml
 rules:
-  # General default
-  - path: "/v1/chat/completions"
-    # The JMESPath expression '@' always matches.
-    match: "@"
-    response:
-      status: 200
-      content: |
-        {
-          "choices": [{
-            "message": {
-              "role": "assistant",
-              "content": "Default response"
-            },
-            "finish_reason": "stop"
-          }]
-        }
-
-  # Custom greeting (overrides default for 'hello')
+  # Fixed message when input contains 'hello':
   - path: "/v1/chat/completions"
     match: "contains(messages[-1].content, 'hello')"
     response:
@@ -124,29 +121,7 @@ rules:
             "finish_reason": "stop"
           }]
         }
-```
-
-Return a 401 error when message contains `error-401`:
-
-```yaml
-rules:
-  # General default
-  - path: "/v1/chat/completions"
-    # The JMESPath expression '@' always matches.
-    match: "@"
-    response:
-      status: 200
-      content: |
-        {
-          "choices": [{
-            "message": {
-              "role": "assistant",
-              "content": "OK"
-            }
-          }]
-        }
-
-  # Simulate authentication error (overrides default)
+  # Realistic OpenAI 401 if the input contains `error-401`:
   - path: "/v1/chat/completions"
     match: "contains(messages[-1].content, 'error-401')"
     response:
@@ -160,18 +135,14 @@ rules:
             "code": "invalid_api_key"
           }
         }
-```
 
-Match different paths using the `path` field:
-
-```yaml
-rules:
   # List models endpoint
   - path: "/v1/models"
     # The JMESPath expression '@' always matches.
     match: "@"
     response:
       status: 200
+      # Return a set of models.
       content: |
         {
           "data": [
@@ -183,17 +154,19 @@ rules:
 
 ### Loading Configuration Files
 
-For Node.js, the `--config` parameter can be used for a non-default location:
+The `--config` parameter can be used for a non-default location:
 
 ```bash
+# Use the '--config' parameter directly...
 mock-llm --config /tmp/myconfig.yaml
-```
 
-For Docker you can mount a local file into the container:
-
-```bash
+# ...mount a config file from the working directory for mock-llm in docker.
 docker run -v $(pwd)/mock-llm.yaml:/app/mock-llm.yaml -p 8080:8080 ghcr.io/dwmkerr/mock-llm
 ```
+
+### Updating Configuration
+
+Configuration can be updated at runtime via the `/config` endpoint: `GET` returns current config (JSON by default, YAML with `Accept: application/x-yaml`), `POST` replaces it, `PATCH` merges updates, `DELETE` resets to default. Both `POST` and `PATCH` accept JSON (`Content-Type: application/json`) or YAML (`Content-Type: application/x-yaml`).
 
 ### Health & Readiness Checks
 
@@ -204,10 +177,6 @@ curl http://localhost:8080/health
 curl http://localhost:8080/ready
 # {"status":"ready"}
 ```
-
-### Updating Configuration
-
-Configuration can be updated at runtime via the `/config` endpoint: `GET` returns current config (JSON by default, YAML with `Accept: application/x-yaml`), `POST` replaces it, `PATCH` merges updates, `DELETE` resets to default. Both `POST` and `PATCH` accept JSON (`Content-Type: application/json`) or YAML (`Content-Type: application/x-yaml`).
 
 ### Template Variables
 
