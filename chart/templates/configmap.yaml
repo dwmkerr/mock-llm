@@ -1,0 +1,11 @@
+{{- if and .Values.config (not .Values.existingConfigMap) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mock-llm.fullname" . }}
+  labels:
+    {{- include "mock-llm.labels" . | nindent 4 }}
+data:
+  mock-llm.yaml: |
+    {{- toYaml .Values.config | nindent 4 }}
+{{- end }}

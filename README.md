@@ -20,6 +20,7 @@ The server can be configured to provide different responses based on the input, 
     - [Updating Configuration](#updating-configuration)
     - [Health & Readiness Checks](#health--readiness-checks)
     - [Template Variables](#template-variables)
+- [Deploying to Kubernetes with Helm](#deploying-to-kubernetes-with-helm)
 - [Examples](#examples)
 - [Developer Guide](#developer-guide)
 
@@ -204,6 +205,32 @@ kubectl port-forward svc/mock-llm 8080:8080 &
 curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+Custom configuration via values.yaml:
+
+```yaml
+
+# Optional additional mock-llm configuration.
+config:
+  rules:
+    - path: "/v1/chat/completions"
+      match: "contains(messages[-1].content, 'hello')"
+      response:
+        status: 200
+        content: |
+          {
+            "choices": [{
+              "message": {
+                "role": "assistant",
+                "content": "Hi there!"
+              },
+              "finish_reason": "stop"
+            }]
+          }
+
+# Or use existing ConfigMap (must contain key 'mock-llm.yaml')
+# existingConfigMap: "my-custom-config"
 ```
 
 ## Examples
