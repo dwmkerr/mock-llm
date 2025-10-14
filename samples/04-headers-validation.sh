@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# Returns the system message (messages[0]) to validate agent configuration.
-# Useful for testing parameter resolution in agent prompts.
+# Validate that specific headers are sent with requests.
+# Useful for testing authentication, API keys, or custom headers.
 
-# Configure mock-llm to return the first message (system message).
+# Configure mock-llm to echo back the Authorization header.
 curl -fsSL -X POST http://localhost:8080/config \
   -H "Content-Type: application/x-yaml" \
   -d '
@@ -18,31 +18,31 @@ rules:
           "object": "chat.completion",
           "model": "{{jmes request body.model}}",
           "choices": [{
-            "message": {{jmes request body.messages[0]}},
+            "message": {
+              "role": "assistant",
+              "content": "Auth: {{jmes request headers.authorization}}"
+            },
             "finish_reason": "stop"
           }]
         }' > /dev/null
 
-# Send a conversation with system message, user message, and assistant response.
+# Send request with Authorization header.
 response=$(curl -fsSL -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer test-key-123" \
   -d '{
     "model": "gpt-4",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant. Always respond in French."},
-      {"role": "user", "content": "Hello"},
-      {"role": "assistant", "content": "Bonjour!"}
-    ]
+    "messages": [{"role": "user", "content": "Hello"}]
   }')
 
-# Expected response with system message.
+# Expected response with auth header echoed.
 expected='{
   "object": "chat.completion",
   "model": "gpt-4",
   "choices": [{
     "message": {
-      "role": "system",
-      "content": "You are a helpful assistant. Always respond in French."
+      "role": "assistant",
+      "content": "Auth: Bearer test-key-123"
     },
     "finish_reason": "stop"
   }]

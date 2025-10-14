@@ -225,7 +225,7 @@ describe('server jmes helper', () => {
         match: '@',
         response: {
           status: 200,
-          content: '{"model":"{{jmes request model}}"}'
+          content: '{"model":"{{jmes request body.model}}"}'
         }
       }]
     };
@@ -253,7 +253,7 @@ describe('server jmes helper', () => {
         match: '@',
         response: {
           status: 200,
-          content: '{"message":{{jmes request messages[0]}}}'
+          content: '{"message":{{jmes request body.messages[0]}}}'
         }
       }]
     };
@@ -276,6 +276,42 @@ describe('server jmes helper', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       message: { role: 'system', content: 'Test' }
+    });
+  });
+
+  it('should access request object properties (body, headers, method, path)', async () => {
+    const config = {
+      rules: [{
+        path: '/v1/chat/completions',
+        match: '@',
+        response: {
+          status: 200,
+          content: '{"model":"{{jmes request body.model}}","auth":"{{jmes request headers.authorization}}","method":"{{jmes request method}}","path":"{{jmes request path}}"}'
+        }
+      }]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer test-key-123'
+      },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      model: 'gpt-4',
+      auth: 'Bearer test-key-123',
+      method: 'POST',
+      path: '/v1/chat/completions'
     });
   });
 });
