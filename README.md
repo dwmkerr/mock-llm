@@ -233,6 +233,8 @@ config:
 # existingConfigMap: "my-custom-config"
 ```
 
+See the [full Helm documentation](docs/helm.md) for advanced configuration, Ark integration, and more.
+
 ## Examples
 
 Any OpenAI API compatible SDKs can be used with Mock LLM. For Node.js:

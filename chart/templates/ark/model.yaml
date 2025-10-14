@@ -1,0 +1,35 @@
+{{- if .Values.ark.model.enabled -}}
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Model
+metadata:
+  name: {{ .Values.ark.model.name }}
+  labels:
+    {{- include "mock-llm.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ark.model.type }}
+  model:
+    value: {{ .Values.ark.model.model }}
+  pollInterval: {{ .Values.ark.model.pollInterval }}
+  config:
+    {{- if eq .Values.ark.model.type "openai" }}
+    openai:
+      baseUrl:
+        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local/v1
+      apiKey:
+        value: {{ .Values.ark.model.apiKey }}
+    {{- else if eq .Values.ark.model.type "azure" }}
+    azure:
+      baseUrl:
+        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+      apiKey:
+        value: {{ .Values.ark.model.apiKey }}
+      apiVersion:
+        value: "2024-12-01-preview"
+    {{- else if eq .Values.ark.model.type "bedrock" }}
+    bedrock:
+      baseUrl:
+        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+      apiKey:
+        value: {{ .Values.ark.model.apiKey }}
+    {{- end }}
+{{- end }}
