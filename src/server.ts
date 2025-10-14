@@ -74,7 +74,8 @@ export function createServer(initialConfig: Config) {
       body: requestBody,
       headers: req.headers,
       method: req.method,
-      path: req.path
+      path: req.path,
+      query: req.query
     };
 
     //  Find all rules that match the JMESPath expression. If no rules match

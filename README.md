@@ -184,9 +184,10 @@ Available in response content templates:
 
 - `{{jmes request path}}` - Query the request object using JMESPath:
   - `request.body` - Request body (e.g., `body.model`, `body.messages[-1].content`)
-  - `request.headers` - HTTP headers (e.g., `headers.authorization`)
+  - `request.headers` - HTTP headers, lowercase (e.g., `headers.authorization`)
   - `request.method` - HTTP method (e.g., `POST`)
   - `request.path` - Request path (e.g., `/v1/chat/completions`)
+  - `request.query` - Query parameters (e.g., `query.apikey`)
 - `{{timestamp}}` - Current time in milliseconds
 
 Objects and arrays are automatically JSON-stringified. Primitives are returned as-is.
@@ -195,6 +196,7 @@ Objects and arrays are automatically JSON-stringified. Primitives are returned a
 "model": "{{jmes request body.model}}"              // "gpt-4"
 "message": {{jmes request body.messages[0]}}        // {"role":"system","content":"..."}
 "auth": "{{jmes request headers.authorization}}"    // "Bearer sk-..."
+"apikey": "{{jmes request query.apikey}}"           // "test-123"
 ```
 
 ## Deploying to Kubernetes with Helm
