@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.10](https://github.com/dwmkerr/mock-llm/compare/v0.1.9...v0.1.10) (2025-10-14)
+
+
+### Features
+
+* add Helm documentation and Ark Model CRD support ([c39287a](https://github.com/dwmkerr/mock-llm/commit/c39287a8403bba5b2ef3377c1ac13a49ea660677))
+* add Helm documentation and Ark Model CRD support ([19083a7](https://github.com/dwmkerr/mock-llm/commit/19083a798a25a30e2d1101bcbd93e48bc68ad698))
+* helm chart mock-llm.yaml config ([168e3dd](https://github.com/dwmkerr/mock-llm/commit/168e3dd3fab6d66aca0463cf0a5d1efc26f549d5))
+* helm chart mock-llm.yaml config ([a0333b7](https://github.com/dwmkerr/mock-llm/commit/a0333b75ffa32e46c45a0e5c52e6e69226e15a04))
+
 ## [0.1.9](https://github.com/dwmkerr/mock-llm/compare/v0.1.8...v0.1.9) (2025-10-13)
 
 
