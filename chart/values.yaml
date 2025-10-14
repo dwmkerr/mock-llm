@@ -167,3 +167,26 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# Mock LLM configuration (optional)
+# If not provided, uses default echo behavior
+# Uncomment and customize to override default configuration
+# config:
+#   rules:
+#     - path: "/v1/chat/completions"
+#       match: "contains(messages[-1].content, 'hello')"
+#       response:
+#         status: 200
+#         content: |
+#           {
+#             "choices": [{
+#               "message": {
+#                 "role": "assistant",
+#                 "content": "Hi there! How can I help you?"
+#               },
+#               "finish_reason": "stop"
+#             }]
+#           }
+
+# Use an existing ConfigMap instead of creating one from config above
+# existingConfigMap: ""
