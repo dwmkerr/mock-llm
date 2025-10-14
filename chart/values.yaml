@@ -190,3 +190,20 @@ affinity: {}
 
 # Use an existing ConfigMap instead of creating one from config above
 # existingConfigMap: ""
+
+# Ark Model CRD configuration (optional)
+# Requires Ark to be installed: https://github.com/mckinsey/agents-at-scale
+ark:
+  model:
+    # Enable creation of Ark Model resource. Requires Ark CRDs to be installed.
+    enabled: false
+    # Model name
+    name: "gpt-5"
+    # Model type (openai, azure, or bedrock)
+    type: "openai"
+    # Model identifier
+    model: "gpt-5"
+    # Poll interval for health checks
+    pollInterval: "3s"
+    # API key for mock service
+    apiKey: "mock-api-key"
