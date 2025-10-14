@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.1.11](https://github.com/dwmkerr/mock-llm/compare/v0.1.10...v0.1.11) (2025-10-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* Templates now access request body via `request.body` instead of direct `request` access.
+
+### Features
+
+* add query params and additional tests ([337db18](https://github.com/dwmkerr/mock-llm/commit/337db18bc06f3ed05d5bdbd56d9204b519b7452f))
+* expose full request object to templates ([b4c9f31](https://github.com/dwmkerr/mock-llm/commit/b4c9f31a12e796f26d8ce059856a8f9fbb01e28b))
+
+
+### Bug Fixes
+
+* include service port in Ark Model baseUrl ([9e29cc9](https://github.com/dwmkerr/mock-llm/commit/9e29cc9f780bc195249c336e358c70fb6f47eacc))
+* include service port in Ark Model baseUrl ([6cbddb1](https://github.com/dwmkerr/mock-llm/commit/6cbddb12f9537b7ae4fe8268e937c24aa10fe3f6))
+
+
+### Miscellaneous Chores
+
+* release 0.1.11 ([b3ee5e7](https://github.com/dwmkerr/mock-llm/commit/b3ee5e7aaac3b6302c619c90d695727e0c4accb7))
+
 ## [0.1.10](https://github.com/dwmkerr/mock-llm/compare/v0.1.9...v0.1.10) (2025-10-14)
 
 
