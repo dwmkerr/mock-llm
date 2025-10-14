@@ -58,7 +58,7 @@ export function createServer(initialConfig: Config) {
 
   //  Handle chat completion requests.
   app.post(/.*/, (req, res) => {
-    const request: ChatCompletionCreateParamsBase = req.body;
+    const requestBody: ChatCompletionCreateParamsBase = req.body;
 
     //  Filter rules by path (typically 'v1/completions').
     //  If no rules for this path we fail.
@@ -68,6 +68,15 @@ export function createServer(initialConfig: Config) {
     if (matchingPathRules.length === 0) {
       throw new Error(`No matching rule found for path: ${req.path}`);
     }
+
+    //  Build the request object that will be available to match and template.
+    const request = {
+      body: requestBody,
+      headers: req.headers,
+      method: req.method,
+      path: req.path,
+      query: req.query
+    };
 
     //  Find all rules that match the JMESPath expression. If no rules match
     //  then we fail.

@@ -225,7 +225,7 @@ describe('server jmes helper', () => {
         match: '@',
         response: {
           status: 200,
-          content: '{"model":"{{jmes request model}}"}'
+          content: '{"model":"{{jmes request body.model}}"}'
         }
       }]
     };
@@ -253,7 +253,7 @@ describe('server jmes helper', () => {
         match: '@',
         response: {
           status: 200,
-          content: '{"message":{{jmes request messages[0]}}}'
+          content: '{"message":{{jmes request body.messages[0]}}}'
         }
       }]
     };
@@ -277,5 +277,175 @@ describe('server jmes helper', () => {
     expect(await response.json()).toEqual({
       message: { role: 'system', content: 'Test' }
     });
+  });
+
+  it('should access request object properties (body, headers, method, path)', async () => {
+    const config = {
+      rules: [{
+        path: '/v1/chat/completions',
+        match: '@',
+        response: {
+          status: 200,
+          content: '{"model":"{{jmes request body.model}}","auth":"{{jmes request headers.authorization}}","method":"{{jmes request method}}","path":"{{jmes request path}}"}'
+        }
+      }]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer test-key-123'
+      },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      model: 'gpt-4',
+      auth: 'Bearer test-key-123',
+      method: 'POST',
+      path: '/v1/chat/completions'
+    });
+  });
+
+  it('should handle missing headers gracefully', async () => {
+    const config = {
+      rules: [{
+        path: '/v1/chat/completions',
+        match: '@',
+        response: {
+          status: 200,
+          content: '{"missing":"{{jmes request headers.nonexistent}}"}'
+        }
+      }]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ missing: 'null' });
+  });
+
+  it('should access query parameters', async () => {
+    const config = {
+      rules: [{
+        path: '/v1/chat/completions',
+        match: '@',
+        response: {
+          status: 200,
+          content: '{"apikey":"{{jmes request query.apikey}}"}'
+        }
+      }]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions?apikey=test-123`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ apikey: 'test-123' });
+  });
+});
+
+describe('server match expressions', () => {
+  const app = createServer(getDefaultConfig());
+  let server: ReturnType<typeof app.listen>;
+  let baseUrl: string;
+
+  beforeAll((done) => {
+    server = app.listen(0, () => {
+      const address = server.address() as { port: number };
+      baseUrl = `http://localhost:${address.port}`;
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  it('should match on body content', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          match: 'body.model',
+          response: {
+            status: 200,
+            content: '{"result":"matched","model":"{{jmes request body.model}}"}'
+          }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ result: 'matched', model: 'gpt-4' });
+  });
+
+  it('should match on request method', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          match: 'method',
+          response: {
+            status: 200,
+            content: '{"method":"{{jmes request method}}"}'
+          }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ method: 'POST' });
   });
 });

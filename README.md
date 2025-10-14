@@ -87,11 +87,11 @@ rules:
         {
           "id": "chatcmpl-{{timestamp}}",
           "object": "chat.completion",
-          "model": "{{jmes request 'model'}}",
+          "model": "{{jmes request body.model}}",
           "choices": [{
             "message": {
               "role": "assistant",
-              "content": "{{jmes request 'messages[-1].content'}}"
+              "content": "{{jmes request body.messages[-1].content}}"
             },
             "finish_reason": "stop"
           }]
@@ -108,7 +108,7 @@ This returns a fixed message for `hello` and simulates a `401` error for `error-
 rules:
   # Fixed message when input contains 'hello':
   - path: "/v1/chat/completions"
-    match: "contains(messages[-1].content, 'hello')"
+    match: "contains(body.messages[-1].content, 'hello')"
     response:
       status: 200
       content: |
@@ -123,7 +123,7 @@ rules:
         }
   # Realistic OpenAI 401 if the input contains `error-401`:
   - path: "/v1/chat/completions"
-    match: "contains(messages[-1].content, 'error-401')"
+    match: "contains(body.messages[-1].content, 'error-401')"
     response:
       status: 401
       content: |
@@ -182,12 +182,21 @@ curl http://localhost:8080/ready
 
 Available in response content templates:
 
-- `{{jmes request path}}` - Query the request body using JMESPath. Primitives (strings, numbers, booleans) are returned as-is. Objects and arrays are automatically JSON-stringified.
+- `{{jmes request <query>}}` - Query the request object using [JMESPath](https://jmespath.org/):
+  - `request.body` - Request body (e.g., `body.model`, `body.messages[-1].content`)
+  - `request.headers` - HTTP headers, lowercase (e.g., `headers.authorization`)
+  - `request.method` - HTTP method (e.g., `POST`)
+  - `request.path` - Request path (e.g., `/v1/chat/completions`)
+  - `request.query` - Query parameters (e.g., `query.apikey`)
 - `{{timestamp}}` - Current time in milliseconds
 
+Objects and arrays are automatically JSON-stringified. Primitives are returned as-is.
+
 ```yaml
-"model": "{{jmes request model}}"              // outputs: "model": "gpt-4"
-"message": {{jmes request messages[0]}}        // outputs: "message": {"role":"system","content":"..."}
+"model": "{{jmes request body.model}}"              // "gpt-4"
+"message": {{jmes request body.messages[0]}}        // {"role":"system","content":"..."}
+"auth": "{{jmes request headers.authorization}}"    // "Bearer sk-..."
+"apikey": "{{jmes request query.apikey}}"           // "test-123"
 ```
 
 ## Deploying to Kubernetes with Helm
