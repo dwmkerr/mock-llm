@@ -14,22 +14,46 @@ spec:
     {{- if eq .Values.ark.model.type "openai" }}
     openai:
       baseUrl:
+        {{- if .Values.ark.model.baseUrl }}
+        value: {{ .Values.ark.model.baseUrl }}
+        {{- else }}
         value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/v1
+        {{- end }}
       apiKey:
         value: {{ .Values.ark.model.apiKey }}
+      {{- with .Values.ark.model.headers }}
+      headers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     {{- else if eq .Values.ark.model.type "azure" }}
     azure:
       baseUrl:
+        {{- if .Values.ark.model.baseUrl }}
+        value: {{ .Values.ark.model.baseUrl }}
+        {{- else }}
         value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+        {{- end }}
       apiKey:
         value: {{ .Values.ark.model.apiKey }}
       apiVersion:
-        value: "2024-12-01-preview"
+        value: {{ .Values.ark.model.apiVersion }}
+      {{- with .Values.ark.model.headers }}
+      headers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     {{- else if eq .Values.ark.model.type "bedrock" }}
     bedrock:
       baseUrl:
+        {{- if .Values.ark.model.baseUrl }}
+        value: {{ .Values.ark.model.baseUrl }}
+        {{- else }}
         value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+        {{- end }}
       apiKey:
         value: {{ .Values.ark.model.apiKey }}
+      {{- with .Values.ark.model.headers }}
+      headers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     {{- end }}
 {{- end }}
