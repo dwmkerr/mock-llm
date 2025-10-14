@@ -14,13 +14,13 @@ spec:
     {{- if eq .Values.ark.model.type "openai" }}
     openai:
       baseUrl:
-        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local/v1
+        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/v1
       apiKey:
         value: {{ .Values.ark.model.apiKey }}
     {{- else if eq .Values.ark.model.type "azure" }}
     azure:
       baseUrl:
-        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
       apiKey:
         value: {{ .Values.ark.model.apiKey }}
       apiVersion:
@@ -28,7 +28,7 @@ spec:
     {{- else if eq .Values.ark.model.type "bedrock" }}
     bedrock:
       baseUrl:
-        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+        value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
       apiKey:
         value: {{ .Values.ark.model.apiKey }}
     {{- end }}
