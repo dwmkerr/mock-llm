@@ -182,7 +182,7 @@ curl http://localhost:8080/ready
 
 Available in response content templates:
 
-- `{{jmes request path}}` - Query the request object using JMESPath:
+- `{{jmes request <query>}}` - Query the request object using [JMESPath](https://jmespath.org/):
   - `request.body` - Request body (e.g., `body.model`, `body.messages[-1].content`)
   - `request.headers` - HTTP headers, lowercase (e.g., `headers.authorization`)
   - `request.method` - HTTP method (e.g., `POST`)
