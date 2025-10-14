@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.12](https://github.com/dwmkerr/mock-llm/compare/v0.1.11...v0.1.12) (2025-10-14)
+
+
+### Features
+
+* add headers, apiVersion, and baseUrl support to Ark Model ([ab2f170](https://github.com/dwmkerr/mock-llm/commit/ab2f170249b1228470f46c47de916049aa176019))
+* add headers, apiVersion, and baseUrl support to Ark Model ([29612b4](https://github.com/dwmkerr/mock-llm/commit/29612b43c3a3c7043fdcb0f3d7a56a056a5d3ccc))
+
 ## [0.1.11](https://github.com/dwmkerr/mock-llm/compare/v0.1.10...v0.1.11) (2025-10-14)
 
 
