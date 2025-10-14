@@ -207,3 +207,27 @@ ark:
     pollInterval: "3s"
     # API key for mock service
     apiKey: "mock-api-key"
+    # API version (for Azure only)
+    apiVersion: "2024-12-01-preview"
+    # Base URL override (optional - auto-generated if not specified)
+    baseUrl: ""
+    # Custom HTTP headers to include in requests
+    # Headers can use static values or reference Secrets/ConfigMaps
+    # Example:
+    # headers:
+    # - name: X-Custom-Header
+    #   value:
+    #     value: "static-value"
+    # - name: X-Secret-Header
+    #   value:
+    #     valueFrom:
+    #       secretKeyRef:
+    #         name: my-secret
+    #         key: token
+    # - name: X-ConfigMap-Header
+    #   value:
+    #     valueFrom:
+    #       configMapKeyRef:
+    #         name: my-config
+    #         key: value
+    headers: []

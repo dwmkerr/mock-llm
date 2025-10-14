@@ -94,6 +94,27 @@ ark:
     apiKey: "mock-api-key"
 ```
 
+Custom headers can be added to test header resolution:
+
+```yaml
+ark:
+  model:
+    enabled: true
+    name: "gpt-5"
+    type: "azure"
+    model: "gpt-5"
+    headers:
+    - name: X-Custom-Header
+      value:
+        value: "static-value"
+    - name: X-Secret-Header
+      value:
+        valueFrom:
+          secretKeyRef:
+            name: my-secret
+            key: token
+```
+
 This creates an Ark Model CRD that points to the mock-llm service. Agents can then reference this model for testing.
 
 Mock-llm supports mocking OpenAI, Azure OpenAI, and AWS Bedrock model types. See the [Ark examples](https://github.com/mckinsey/agents-at-scale/tree/main/tests) for more usage patterns.
@@ -115,6 +136,9 @@ Key configuration options:
 | `ark.model.name` | Model name | `"gpt-5"` |
 | `ark.model.type` | Model type (openai/azure/bedrock) | `"openai"` |
 | `ark.model.model` | Model identifier | `"gpt-5"` |
+| `ark.model.headers` | Custom HTTP headers (supports valueFrom) | `[]` |
+| `ark.model.apiVersion` | API version (Azure only) | `"2024-12-01-preview"` |
+| `ark.model.baseUrl` | Base URL override (auto-generated if empty) | `""` |
 
 See [values.yaml](../chart/values.yaml) for all available options.
 
