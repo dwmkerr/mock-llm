@@ -6,3 +6,4 @@ mock-llm.yaml
 coverage/
 artifacts/
 *.tsbuildinfo
+.devspace/

@@ -60,6 +60,43 @@ jobs:
           helm lint chart
           helm template test-release chart
 
+  e2e-k8s-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup K3s cluster
+        uses: jupyterhub/action-k3s-helm@v4
+        with:
+          k3s-channel: latest
+          metrics-enabled: false
+          traefik-enabled: false
+
+      - name: Install devspace and deploy
+        run: |
+          curl -sSL https://get.devspace.sh | bash
+          devspace deploy
+          kubectl get pods
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=mock-llm --timeout=120s
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run sample tests against K8s deployment
+        run: |
+          set +e
+          kubectl port-forward service/mock-llm 8080:8080 &
+          PID=$!
+          sleep 5
+          npm run test:samples
+          EXIT_CODE=$?
+          kill $PID || true
+          exit $EXIT_CODE
+
   release:
     needs: [build-and-test]
     runs-on: ubuntu-24.04
