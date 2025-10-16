@@ -93,7 +93,9 @@ jobs:
           kubectl port-forward service/mock-llm 6556:6556 &
           PID=$!
           sleep 5
-          npm run test:samples
+          # DISABLE_START_SERVER=1 prevents test suite from starting its own server
+          # allowing it to test against the K8s deployed service
+          DISABLE_START_SERVER=1 npm run test:samples
           EXIT_CODE=$?
           kill $PID || true
           exit $EXIT_CODE

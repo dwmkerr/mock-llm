@@ -3,14 +3,17 @@ import { promisify } from 'util';
 import { exec } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as http from 'http';
 import { createServer } from './src/server';
 import { getDefaultConfig } from './src/config';
 
 const execAsync = promisify(exec);
 
 describe('samples', () => {
-  const app = createServer(getDefaultConfig());
-  let server: ReturnType<typeof app.listen>;
+  // Set DISABLE_START_SERVER=1 to run tests against an existing server (e.g., deployed via Helm)
+  const shouldStartServer = process.env.DISABLE_START_SERVER !== '1';
+  const app = shouldStartServer ? createServer(getDefaultConfig()) : null;
+  let server: http.Server | null = null;
 
   // Get all sample scripts
   const samplesDir = path.join(__dirname, 'samples');
@@ -19,11 +22,19 @@ describe('samples', () => {
     .sort();
 
   beforeAll((done) => {
-    server = app.listen(6556, done);
+    if (shouldStartServer) {
+      server = app!.listen(6556, done);
+    } else {
+      done();
+    }
   });
 
   afterAll((done) => {
-    server.close(done);
+    if (server) {
+      server.close(done);
+    } else {
+      done();
+    }
   });
 
   it.each(sampleScripts)('should run %s', async (script) => {
