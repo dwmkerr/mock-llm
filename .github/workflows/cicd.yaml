@@ -78,7 +78,8 @@ jobs:
 
       - name: Install devspace and deploy
         run: |
-          curl -sSL https://get.devspace.sh | bash
+          curl -L -o devspace "https://github.com/loft-sh/devspace/releases/latest/download/devspace-linux-amd64"
+          sudo install -c -m 0755 devspace /usr/local/bin
           devspace deploy
           kubectl get pods
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=mock-llm --timeout=120s
