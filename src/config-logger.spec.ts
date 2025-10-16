@@ -15,8 +15,8 @@ describe('printConfigSummary', () => {
     printConfigSummary(config, 'Test config loaded');
 
     expect(consoleSpy).toHaveBeenCalledWith('Test config loaded');
-    expect(consoleSpy).toHaveBeenCalledWith('  - @');
-    expect(consoleSpy).toHaveBeenCalledWith('  - contains(path, "models")');
+    expect(consoleSpy).toHaveBeenCalledWith('  - rule 1, match: @');
+    expect(consoleSpy).toHaveBeenCalledWith('  - rule 2, match: contains(path, "models")');
 
     consoleSpy.mockRestore();
   });
