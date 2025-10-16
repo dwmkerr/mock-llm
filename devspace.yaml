@@ -1,0 +1,62 @@
+# DevSpace configuration for mock-llm development
+version: v2beta1
+
+images:
+  mock-llm:
+    image: mock-llm
+    dockerfile: ./Dockerfile
+    context: .
+
+pipelines:
+  deploy: |-
+    build_images --all
+    create_deployments --all
+  dev: |-
+    create_deployments --all
+    start_dev --all
+
+deployments:
+  mock-llm:
+    helm:
+      chart:
+        path: ./chart
+      values:
+        image:
+          repository: ${runtime.images.mock-llm.image}
+          tag: ${runtime.images.mock-llm.tag}
+        podSecurityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+          fsGroup: 0
+        securityContext:
+          allowPrivilegeEscalation: true
+          readOnlyRootFilesystem: false
+          capabilities:
+            add:
+            - ALL
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+
+dev:
+  mock-llm:
+    imageSelector: mock-llm
+    devImage: node:24-alpine
+    command:
+      ["sh", "-c", "cd /app && npm install && npm run dev"]
+    logs:
+      lastLines: 50
+    # Port 6556 = MLLM on dialpad (avoids conflicts with common dev ports)
+    ports:
+      - port: "6556:6556"
+    sync:
+      - path: .:/app
+        startContainer: true
+        disableDownload: true
+        uploadExcludeFile: .dockerignore
+    ssh:
+      enabled: true

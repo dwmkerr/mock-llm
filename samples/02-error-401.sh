@@ -6,7 +6,7 @@ set -eo pipefail
 # mock-llm
 
 # Configure mock-llm to return a 401 error for all responses.
-curl -fsSL -X POST http://localhost:8080/config \
+curl -fsSL -X POST http://localhost:6556/config \
   -H "Content-Type: application/x-yaml" \
   -d '
 rules:
@@ -25,7 +25,7 @@ rules:
         }' > /dev/null
 
 # Send a request - expect a 401 response.
-response=$(curl -sSL -w "\n%{http_code}" -X POST http://localhost:8080/v1/chat/completions \
+response=$(curl -sSL -w "\n%{http_code}" -X POST http://localhost:6556/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4",

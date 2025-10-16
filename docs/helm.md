@@ -20,8 +20,8 @@ kubectl get service mock-llm
 Test the service:
 
 ```bash
-kubectl port-forward svc/mock-llm 8080:8080 &
-curl -X POST http://localhost:8080/v1/chat/completions \
+kubectl port-forward svc/mock-llm 6556:6556 &
+curl -X POST http://localhost:6556/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
@@ -129,7 +129,7 @@ Key configuration options:
 | `image.repository` | Container image repository | `ghcr.io/dwmkerr/mock-llm` |
 | `image.tag` | Container image tag | Chart appVersion |
 | `service.type` | Kubernetes service type | `ClusterIP` |
-| `service.port` | Service port | `8080` |
+| `service.port` | Service port | `6556` |
 | `config` | Mock LLM configuration rules | `nil` (uses defaults) |
 | `existingConfigMap` | Use existing ConfigMap for config | `""` |
 | `ark.model.enabled` | Create Ark `model` resource (requires Ark CRDs to be installed) | `false` |

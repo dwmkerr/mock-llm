@@ -5,7 +5,7 @@ set -eo pipefail
 # Useful for testing authentication, API keys, or custom headers.
 
 # Configure mock-llm to echo back the Authorization header.
-curl -fsSL -X POST http://localhost:8080/config \
+curl -fsSL -X POST http://localhost:6556/config \
   -H "Content-Type: application/x-yaml" \
   -d '
 rules:
@@ -27,7 +27,7 @@ rules:
         }' > /dev/null
 
 # Send request with Authorization header.
-response=$(curl -fsSL -X POST http://localhost:8080/v1/chat/completions \
+response=$(curl -fsSL -X POST http://localhost:6556/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer test-key-123" \
   -d '{

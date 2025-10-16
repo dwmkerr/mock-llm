@@ -18,6 +18,6 @@ COPY --from=builder /app/dist ./dist
 
 USER node
 
-EXPOSE 8080
+EXPOSE 6556
 
 CMD ["node", "dist/main.js"]
