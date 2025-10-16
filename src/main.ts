@@ -2,6 +2,7 @@
 
 import { createServer } from './server';
 import { getConfigPath, loadConfig } from './config';
+import { printConfigSummary } from './config-logger';
 import pkg from '../package.json';
 
 const HOST = process.env.HOST || '0.0.0.0';
@@ -12,7 +13,7 @@ const configArgIndex = process.argv.indexOf('--config');
 const configPath = configArgIndex !== -1 ? process.argv[configArgIndex + 1] : getConfigPath();
 
 const config = loadConfig(configPath);
-console.log(`Loaded configuration from ${configPath} - ${config.rules.length} rule(s)`);
+printConfigSummary(config, `Loaded configuration from ${configPath}`);
 
 const app = createServer(config);
 

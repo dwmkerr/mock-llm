@@ -4,6 +4,7 @@ import * as yaml from 'js-yaml';
 import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 import { Config, Rule } from './config';
 import { renderTemplate } from './template';
+import { printConfigSummary } from './config-logger';
 
 export function createServer(initialConfig: Config) {
   //  Track the current config, which can be changed via '/config' endpoints.
@@ -39,7 +40,7 @@ export function createServer(initialConfig: Config) {
     currentConfig = typeof req.body === 'string'
       ? yaml.load(req.body) as Config
       : req.body;
-    console.log(`config replaced - ${currentConfig.rules.length} rule(s)`);
+    printConfigSummary(currentConfig, 'config replaced');
     res.json(currentConfig);
   });
   app.patch('/config', (req, res) => {
@@ -47,12 +48,12 @@ export function createServer(initialConfig: Config) {
       ? yaml.load(req.body) as Config
       : req.body;
     currentConfig = { ...currentConfig, ...update };
-    console.log(`config updated - ${currentConfig.rules.length} rule(s)`);
+    printConfigSummary(currentConfig, 'config updated');
     res.json(currentConfig);
   });
   app.delete('/config', (req, res) => {
     currentConfig = { ...initialConfig };
-    console.log(`config reset - ${currentConfig.rules.length} rule(s)`);
+    printConfigSummary(currentConfig, 'config reset');
     res.json(currentConfig);
   });
 

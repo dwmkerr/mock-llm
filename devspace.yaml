@@ -58,7 +58,5 @@ dev:
         startContainer: true
         disableDownload: true
         uploadExcludeFile: .dockerignore
-        onUpload:
-          restartContainer: true
     ssh:
       enabled: true
