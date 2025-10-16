@@ -19,7 +19,7 @@ describe('main', () => {
     (createServer as jest.Mock).mockReturnValue(mockApp);
   });
 
-  it('loads config, prints summary, and starts server', () => {
+  it('loads config, prints summary, and starts server', async () => {
     const mockConfig = {
       rules: [
         { path: '/v1/chat/completions', match: '@', response: { status: 200, content: '{}' } }
@@ -30,8 +30,8 @@ describe('main', () => {
     (loadConfig as jest.Mock).mockReturnValue(mockConfig);
 
     // Import main to execute it
-    jest.isolateModules(() => {
-      require('./main');
+    await jest.isolateModulesAsync(async () => {
+      await import('./main');
     });
 
     expect(getConfigPath).toHaveBeenCalled();
