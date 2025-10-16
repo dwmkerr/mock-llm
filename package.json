@@ -24,10 +24,15 @@
   ],
   "author": "Dave Kerr",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dwmkerr/mock-llm"
+  },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@a2a-js/sdk": "^0.3.4",
     "express": "^5.1.0",
     "jmespath": "^0.16.0",
     "js-yaml": "^4.1.0",

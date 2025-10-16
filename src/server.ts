@@ -5,8 +5,9 @@ import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/compl
 import { Config, Rule } from './config';
 import { renderTemplate } from './template';
 import { printConfigSummary } from './config-logger';
+import { setupA2ARoutes } from './a2a/routes';
 
-export function createServer(initialConfig: Config) {
+export function createServer(initialConfig: Config, host: string, port: number) {
   //  Track the current config, which can be changed via '/config' endpoints.
   let currentConfig = { ...initialConfig };
 
@@ -18,6 +19,9 @@ export function createServer(initialConfig: Config) {
     console.log(`${req.method} ${req.path}`);
     next();
   });
+
+  // Setup A2A routes
+  setupA2ARoutes(app, host, port);
 
   //  Health and readiness checks
   app.get('/health', (_, res) => {

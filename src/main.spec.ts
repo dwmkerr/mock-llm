@@ -37,6 +37,6 @@ describe('main', () => {
     expect(getConfigPath).toHaveBeenCalled();
     expect(loadConfig).toHaveBeenCalledWith('/app/mock-llm.yaml');
     expect(printConfigSummary).toHaveBeenCalledWith(mockConfig, 'Loaded configuration from /app/mock-llm.yaml');
-    expect(createServer).toHaveBeenCalledWith(mockConfig);
+    expect(createServer).toHaveBeenCalledWith(mockConfig, '0.0.0.0', 6556);
   });
 });
