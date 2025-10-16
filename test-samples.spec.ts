@@ -12,7 +12,7 @@ const execAsync = promisify(exec);
 describe('samples', () => {
   // Set DISABLE_START_SERVER=1 to run tests against an existing server (e.g., deployed via Helm)
   const shouldStartServer = process.env.DISABLE_START_SERVER !== '1';
-  const app = shouldStartServer ? createServer(getDefaultConfig()) : null;
+  const app = shouldStartServer ? createServer(getDefaultConfig(), 'localhost', 6556) : null;
   let server: http.Server | null = null;
 
   // Get all sample scripts

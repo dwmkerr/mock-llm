@@ -15,7 +15,7 @@ const configPath = configArgIndex !== -1 ? process.argv[configArgIndex + 1] : ge
 const config = loadConfig(configPath);
 printConfigSummary(config, `Loaded configuration from ${configPath}`);
 
-const app = createServer(config);
+const app = createServer(config, HOST, PORT);
 
 app.listen(PORT, HOST, () => {
   console.log(`${pkg.name} v${pkg.version} server running on ${HOST}:${PORT}`);

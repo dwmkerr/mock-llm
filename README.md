@@ -72,6 +72,8 @@ Response:
 }
 ```
 
+Mock LLM also has basic support for the [A2A (Agent-to-Agent) protocol](docs/a2a.md) for testing agent messages, task, and asynchronous operations.
+
 ## Configuration
 
 Responses are configured using a `yaml` file loaded from `mock-llm.yaml` in the current working directory. Rules are evaluated in order - last match wins.

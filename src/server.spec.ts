@@ -4,7 +4,7 @@ import { createServer } from './server';
 import { getDefaultConfig } from './config';
 
 describe('server config API', () => {
-  const app = createServer(getDefaultConfig());
+  const app = createServer(getDefaultConfig(), 'localhost', 6556);
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
@@ -124,7 +124,7 @@ describe('server config API', () => {
 });
 
 describe('server error handling', () => {
-  const app = createServer(getDefaultConfig());
+  const app = createServer(getDefaultConfig(), 'localhost', 6556);
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
@@ -202,7 +202,7 @@ describe('server error handling', () => {
 });
 
 describe('server jmes helper', () => {
-  const app = createServer(getDefaultConfig());
+  const app = createServer(getDefaultConfig(), 'localhost', 6556);
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
@@ -373,7 +373,7 @@ describe('server jmes helper', () => {
 });
 
 describe('server match expressions', () => {
-  const app = createServer(getDefaultConfig());
+  const app = createServer(getDefaultConfig(), 'localhost', 6556);
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
