@@ -5,7 +5,7 @@ import { getConfigPath, loadConfig } from './config';
 import pkg from '../package.json';
 
 const HOST = process.env.HOST || '0.0.0.0';
-const PORT = parseInt(process.env.PORT || '8080', 10);
+const PORT = parseInt(process.env.PORT || '6556', 10);
 
 // Parse --config argument
 const configArgIndex = process.argv.indexOf('--config');

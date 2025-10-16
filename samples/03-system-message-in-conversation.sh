@@ -5,7 +5,7 @@ set -eo pipefail
 # Useful for testing parameter resolution in agent prompts.
 
 # Configure mock-llm to return the first message (system message).
-curl -fsSL -X POST http://localhost:8080/config \
+curl -fsSL -X POST http://localhost:6556/config \
   -H "Content-Type: application/x-yaml" \
   -d '
 rules:
@@ -24,7 +24,7 @@ rules:
         }' > /dev/null
 
 # Send a conversation with system message, user message, and assistant response.
-response=$(curl -fsSL -X POST http://localhost:8080/v1/chat/completions \
+response=$(curl -fsSL -X POST http://localhost:6556/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4",

@@ -24,7 +24,16 @@ deployments:
         image:
           repository: ${runtime.images.mock-llm.image}
           tag: ${runtime.images.mock-llm.tag}
-          pullPolicy: IfNotPresent
+        podSecurityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+          fsGroup: 0
+        securityContext:
+          allowPrivilegeEscalation: true
+          readOnlyRootFilesystem: false
+          capabilities:
+            add:
+            - ALL
         resources:
           limits:
             memory: "256Mi"
@@ -41,7 +50,9 @@ dev:
       ["sh", "-c", "cd /app && npm install && npm run dev"]
     logs:
       lastLines: 50
-    # File synchronization for hot reload
+    # Port 6556 = MLLM on dialpad (avoids conflicts with common dev ports)
+    ports:
+      - port: "6556:6556"
     sync:
       - path: .:/app
         startContainer: true
@@ -49,6 +60,5 @@ dev:
         uploadExcludeFile: .dockerignore
         onUpload:
           restartContainer: true
-    # Enable SSH for IDE integration
     ssh:
       enabled: true

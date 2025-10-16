@@ -19,7 +19,7 @@ describe('samples', () => {
     .sort();
 
   beforeAll((done) => {
-    server = app.listen(8080, done);
+    server = app.listen(6556, done);
   });
 
   afterAll((done) => {

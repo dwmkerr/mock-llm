@@ -35,16 +35,19 @@ npm install -g mock-llm
 mock-llm
 ```
 
+Mock-LLM runs on port 6556 (which is dial-pad code 6556, to avoid conflicts with
+common ports).
+
 Or use Docker:
 
 ```bash
-docker run -p 8080:8080 ghcr.io/dwmkerr/mock-llm
+docker run -p 6556:6556 ghcr.io/dwmkerr/mock-llm
 ```
 
 Test with curl. The default rule for incoming requests is to reply with the user's exact message:
 
 ```bash
-curl -X POST http://localhost:8080/v1/chat/completions \
+curl -X POST http://localhost:6556/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4",
@@ -161,7 +164,7 @@ The `--config` parameter can be used for a non-default location:
 mock-llm --config /tmp/myconfig.yaml
 
 # ...mount a config file from the working directory for mock-llm in docker.
-docker run -v $(pwd)/mock-llm.yaml:/app/mock-llm.yaml -p 8080:8080 ghcr.io/dwmkerr/mock-llm
+docker run -v $(pwd)/mock-llm.yaml:/app/mock-llm.yaml -p 6556:6556 ghcr.io/dwmkerr/mock-llm
 ```
 
 ### Updating Configuration
@@ -171,10 +174,10 @@ Configuration can be updated at runtime via the `/config` endpoint: `GET` return
 ### Health & Readiness Checks
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:6556/health
 # {"status":"healthy"}
 
-curl http://localhost:8080/ready
+curl http://localhost:6556/ready
 # {"status":"ready"}
 ```
 
@@ -210,8 +213,8 @@ kubectl get deployment mock-llm
 kubectl get service mock-llm
 
 # Port forward and test
-kubectl port-forward svc/mock-llm 8080:8080 &
-curl -X POST http://localhost:8080/v1/chat/completions \
+kubectl port-forward svc/mock-llm 6556:6556 &
+curl -X POST http://localhost:6556/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
@@ -253,7 +256,7 @@ const OpenAI = require('openai');
 
 const client = new OpenAI({
   apiKey: 'mock-key',
-  baseURL: 'http://localhost:8080/v1'
+  baseURL: 'http://localhost:6556/v1'
 });
 
 const response = await client.chat.completions.create({
@@ -272,7 +275,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key='mock-key',
-    base_url='http://localhost:8080/v1'
+    base_url='http://localhost:6556/v1'
 )
 
 response = client.chat.completions.create(

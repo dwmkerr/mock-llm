@@ -9,7 +9,7 @@ set -eo pipefail
 # echoed back to the caller.
 
 # Send a request.
-response=$(curl -fsSL -X POST http://localhost:8080/v1/chat/completions \
+response=$(curl -fsSL -X POST http://localhost:6556/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4",

@@ -89,7 +89,7 @@ jobs:
       - name: Run sample tests against K8s deployment
         run: |
           set +e
-          kubectl port-forward service/mock-llm 8080:8080 &
+          kubectl port-forward service/mock-llm 6556:6556 &
           PID=$!
           sleep 5
           npm run test:samples
