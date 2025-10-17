@@ -98,9 +98,40 @@ class CountdownAgentExecutor implements AgentExecutor {
         .map((part) => (part as { text: string }).text)
         .join(' ');
 
-      // Look for a number in the message
-      const numberMatch = userText.match(/\d+/);
+      // Look for a number in the message (including negative numbers)
+      const numberMatch = userText.match(/-?\d+/);
       const countdownFrom = numberMatch ? parseInt(numberMatch[0], 10) : 30;
+      console.log(`[${agentCard.name}] Task ${taskId}: Extracted text="${userText}", match="${numberMatch?.[0]}", countdownFrom=${countdownFrom}`);
+
+      // Check for negative number
+      if (countdownFrom < 0) {
+        const errorUpdate: TaskStatusUpdateEvent = {
+          kind: Kind.StatusUpdate,
+          taskId: taskId,
+          contextId: contextId,
+          status: {
+            state: TaskState.Failed,
+            message: {
+              kind: Kind.Message,
+              role: Role.Agent,
+              messageId: uuidv4(),
+              parts: [
+                {
+                  kind: Kind.Text,
+                  text: `Cannot countdown from negative number ${countdownFrom}`,
+                },
+              ],
+              taskId: taskId,
+              contextId: contextId,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          final: true,
+        };
+        console.log(`[${agentCard.name}] Task ${taskId}: Cannot countdown from negative number ${countdownFrom}`);
+        eventBus.publish(errorUpdate);
+        return;
+      }
 
       // Publish "working" status update
       const workingStatusUpdate: TaskStatusUpdateEvent = {

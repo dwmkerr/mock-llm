@@ -36,10 +36,10 @@ deployments:
             - ALL
         resources:
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "2Gi"
+            cpu: "1000m"
           requests:
-            memory: "128Mi"
+            memory: "512Mi"
             cpu: "100m"
         ark:
           a2a:

@@ -59,4 +59,40 @@ describe('CountdownAgent', () => {
       final: true,
     });
   });
+
+  it('should fail when given a negative number', async () => {
+    const agent = countdownAgent.executor;
+    const eventBus = new DefaultExecutionEventBus();
+    const events: unknown[] = [];
+
+    eventBus.on('event', (event) => events.push(event));
+
+    const message: Message = {
+      messageId: 'test-negative',
+      kind: Kind.Message,
+      role: Role.User,
+      parts: [{ kind: Kind.Text, text: 'Countdown from -5' }],
+      contextId: 'ctx-negative',
+      taskId: 'task-negative',
+    };
+
+    const requestContext = new RequestContext(message, 'task-negative', 'ctx-negative', undefined);
+
+    await agent.execute(requestContext, eventBus);
+
+    // Verify last event is a failure status update with the error message
+    const lastEvent = events[events.length - 1];
+    expect(lastEvent).toMatchObject({
+      kind: Kind.StatusUpdate,
+      taskId: 'task-negative',
+      contextId: 'ctx-negative',
+      status: {
+        state: TaskState.Failed,
+        message: {
+          parts: [{ kind: Kind.Text, text: 'Cannot countdown from negative number -5' }],
+        },
+      },
+      final: true,
+    });
+  });
 });

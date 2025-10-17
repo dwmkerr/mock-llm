@@ -140,6 +140,36 @@ Stream task updates:
 curl -N http://localhost:6556/a2a/agents/countdown-agent/stream/task-abc123
 ```
 
+If a negative number is provided in the message, the countdown agent will return a task in the `failed` state, which allows for testing error scenarios.
+
+Example response for negative number:
+
+```json
+{
+  "kind": "statusUpdate",
+  "taskId": "task-123",
+  "contextId": "ctx-123",
+  "status": {
+    "state": "failed",
+    "message": {
+      "kind": "message",
+      "role": "agent",
+      "messageId": "msg-456",
+      "parts": [
+        {
+          "kind": "text",
+          "text": "Cannot countdown from negative number -5"
+        }
+      ],
+      "taskId": "task-123",
+      "contextId": "ctx-123"
+    },
+    "timestamp": "2025-10-17T12:00:00.000Z"
+  },
+  "final": true
+}
+```
+
 **Echo Agent**
 
 The echo agent immediately responds with a `message` object that echo's the user's message.
