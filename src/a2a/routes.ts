@@ -4,35 +4,44 @@ import {
   DefaultRequestHandler,
 } from '@a2a-js/sdk/server';
 import { A2AExpressApp } from '@a2a-js/sdk/server/express';
-import { CountdownAgent, agentCard, AgentId } from './countdown-agent';
+import { countdownAgent } from './countdown-agent';
+import { echoAgent } from './echo-agent';
+import { A2AAgent } from './types';
+
+const agents: A2AAgent[] = [countdownAgent, echoAgent];
 
 export function setupA2ARoutes(app: express.Application, host: string, port: number): void {
-  // Patch the agent card URL with actual host/port
-  const agentCardWithUrl = {
-    ...agentCard,
-    url: `http://${host}:${port}/a2a/agents/${AgentId}`,
-  };
-  // Create task store and agent executor
-  const taskStore = new InMemoryTaskStore();
-  const agentExecutor = new CountdownAgent();
-
-  // Create request handler
-  const requestHandler = new DefaultRequestHandler(
-    agentCardWithUrl,
-    taskStore,
-    agentExecutor
-  );
-
-  // Create A2A Express app
-  const a2aApp = new A2AExpressApp(requestHandler);
-
-  // Create a sub-app for the agent
-  const agentApp = express();
-  a2aApp.setupRoutes(agentApp);
-
-  // Mount the agent app at the agent-specific path
-  app.use(`/a2a/agents/${AgentId}`, agentApp);
+  // Use env vars for agent card URL if provided, otherwise use actual host/port
+  const cardHost = process.env.AGENT_CARD_HOST || host;
+  const cardPort = process.env.AGENT_CARD_PORT || port.toString();
 
   console.log('Loaded A2A agents:');
-  console.log(`  - ${AgentId}: http://${host}:${port}/a2a/agents/${AgentId}/.well-known/agent-card.json`);
+
+  for (const agent of agents) {
+    // Patch the agent card URL with configured host/port
+    const agentCardWithUrl = {
+      ...agent.card,
+      url: `http://${cardHost}:${cardPort}/a2a/agents/${agent.id}`,
+    };
+
+    // Create task store and request handler
+    const taskStore = new InMemoryTaskStore();
+    const requestHandler = new DefaultRequestHandler(
+      agentCardWithUrl,
+      taskStore,
+      agent.executor
+    );
+
+    // Create A2A Express app
+    const a2aApp = new A2AExpressApp(requestHandler);
+
+    // Create a sub-app for the agent
+    const agentApp = express();
+    a2aApp.setupRoutes(agentApp);
+
+    // Mount the agent app at the agent-specific path
+    app.use(`/a2a/agents/${agent.id}`, agentApp);
+
+    console.log(`  - ${agent.id}: http://${host}:${port}/a2a/agents/${agent.id}/.well-known/agent-card.json`);
+  }
 }

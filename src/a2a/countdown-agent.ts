@@ -10,11 +10,12 @@ import {
   ExecutionEventBus,
 } from '@a2a-js/sdk/server';
 import { Kind, Role, TaskState } from './protocol';
+import { A2AAgent } from './types';
 import pkg from '../../package.json';
 
-export const AgentId = 'countdown-agent';
+const AgentId = 'countdown-agent';
 
-export const agentCard: AgentCard = {
+const agentCard: AgentCard = {
   name: 'Countdown Agent',
   description: 'A simple countdown agent for testing A2A tasks',
   url: '', // Will be set by routes.ts
@@ -51,7 +52,7 @@ export const agentCard: AgentCard = {
   supportsAuthenticatedExtendedCard: false,
 };
 
-export class CountdownAgent implements AgentExecutor {
+class CountdownAgentExecutor implements AgentExecutor {
   private cancelledTasks = new Set<string>();
 
   public cancelTask = async (
@@ -242,3 +243,9 @@ export class CountdownAgent implements AgentExecutor {
     }
   }
 }
+
+export const countdownAgent: A2AAgent = {
+  id: AgentId,
+  card: agentCard,
+  executor: new CountdownAgentExecutor(),
+};

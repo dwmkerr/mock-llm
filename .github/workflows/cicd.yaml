@@ -76,6 +76,11 @@ jobs:
           metrics-enabled: false
           traefik-enabled: false
 
+      - name: Install Ark
+        run: |
+          npm install -g @agents-at-scale/ark
+          ark install --yes
+
       - name: Install devspace and deploy
         run: |
           curl -L -o devspace "https://github.com/loft-sh/devspace/releases/latest/download/devspace-linux-amd64"

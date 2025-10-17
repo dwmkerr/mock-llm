@@ -119,6 +119,18 @@ This creates an Ark Model CRD that points to the mock-llm service. Agents can th
 
 Mock-llm supports mocking OpenAI, Azure OpenAI, and AWS Bedrock model types. See the [Ark examples](https://github.com/mckinsey/agents-at-scale/tree/main/tests) for more usage patterns.
 
+### A2A Agents
+
+Mock-llm includes two A2A protocol agents (echo and countdown). Enable A2AServer CRDs:
+
+```yaml
+ark:
+  a2a:
+    enabled: true
+```
+
+This creates A2AServer resources that Ark can discover and use. See [A2A documentation](./a2a.md) for more details on the available agents.
+
 ## Chart Values
 
 Key configuration options:
@@ -139,6 +151,7 @@ Key configuration options:
 | `ark.model.headers` | Custom HTTP headers (supports valueFrom) | `[]` |
 | `ark.model.apiVersion` | API version (Azure only) | `"2024-12-01-preview"` |
 | `ark.model.baseUrl` | Base URL override (auto-generated if empty) | `""` |
+| `ark.a2a.enabled` | Create Ark `a2aserver` resources (requires Ark CRDs) | `false` |
 
 See [values.yaml](../chart/values.yaml) for all available options.
 

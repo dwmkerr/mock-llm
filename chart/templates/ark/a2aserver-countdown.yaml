@@ -1,0 +1,21 @@
+{{- if .Values.ark.a2a.enabled -}}
+apiVersion: ark.mckinsey.com/v1prealpha1
+kind: A2AServer
+metadata:
+  name: {{ include "mock-llm.fullname" . }}-countdown
+  labels:
+    {{- include "mock-llm.labels" . | nindent 4 }}
+spec:
+  address:
+    {{- if and .Values.ark.a2a.agentCardHost .Values.ark.a2a.agentCardPort }}
+    value: http://{{ .Values.ark.a2a.agentCardHost }}:{{ .Values.ark.a2a.agentCardPort }}/a2a/agents/countdown-agent
+    {{- else }}
+    valueFrom:
+      serviceRef:
+        name: {{ include "mock-llm.fullname" . }}
+        port: http
+        path: /a2a/agents/countdown-agent
+    {{- end }}
+  description: Countdown agent that demonstrates streaming task updates
+  pollInterval: {{ .Values.ark.a2a.pollInterval | default "3s" }}
+{{- end }}
