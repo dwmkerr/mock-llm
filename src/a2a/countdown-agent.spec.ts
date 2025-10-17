@@ -1,11 +1,11 @@
-import { CountdownAgent } from './countdown-agent';
+import { countdownAgent } from './countdown-agent';
 import { DefaultExecutionEventBus, RequestContext } from '@a2a-js/sdk/server';
 import { Kind, Role, TaskState } from './protocol';
 import type { Message, Task } from '@a2a-js/sdk';
 
 describe('CountdownAgent', () => {
   it('should countdown from specified number and publish proper events', async () => {
-    const agent = new CountdownAgent();
+    const agent = countdownAgent.executor;
     const eventBus = new DefaultExecutionEventBus();
     const events: unknown[] = [];
 

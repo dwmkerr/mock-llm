@@ -140,6 +140,10 @@ Stream task updates:
 curl -N http://localhost:6556/a2a/agents/countdown-agent/stream/task-abc123
 ```
 
+**Echo Agent**
+
+The echo agent immediately responds with a `message` object that echo's the user's message.
+
 ## A2A Inspector
 
 The [A2A Inspector](https://github.com/a2aproject/a2a-inspector) can be used to communicate with the agent. Run the inspector:
