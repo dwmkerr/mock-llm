@@ -43,4 +43,40 @@ if [[ ! "$final_message" =~ "complete" ]]; then
   exit 1
 fi
 
+# Test negative number validation
+response_negative=$(curl -fsSL -X POST http://localhost:6556/a2a/agents/countdown-agent/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "params": {
+      "message": {
+        "messageId": "msg-2",
+        "kind": "message",
+        "role": "user",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "Countdown from -1"
+          }
+        ]
+      }
+    },
+    "id": 2
+  }')
+
+# Verify the response contains a failed task
+task_state_negative=$(echo "$response_negative" | jq -r '.result.status.state')
+if [ "$task_state_negative" != "failed" ]; then
+  echo "failed: expected task state 'failed' for negative number, got '$task_state_negative'"
+  exit 1
+fi
+
+# Verify the error message contains "negative"
+error_message=$(echo "$response_negative" | jq -r '.result.status.message.parts[0].text')
+if [[ ! "$error_message" =~ "negative" ]]; then
+  echo "failed: expected error message to contain 'negative', got '$error_message'"
+  exit 1
+fi
+
 echo "passed"
