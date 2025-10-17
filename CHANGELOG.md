@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.1.13](https://github.com/dwmkerr/mock-llm/compare/v0.1.12...v0.1.13) (2025-10-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* createServer now requires host and port parameters
+
+### Features
+
+* add A2A protocol support with countdown agent ([04a3c04](https://github.com/dwmkerr/mock-llm/commit/04a3c049cc1dacd3a0127293b854dbd03199839c))
+* add A2A protocol support with countdown agent ([d908bec](https://github.com/dwmkerr/mock-llm/commit/d908bec45ff0a634689bae2a44731b19b0d6d9d3))
+* add Ark A2AServer CRD support for A2A agents ([adec0f6](https://github.com/dwmkerr/mock-llm/commit/adec0f63dac2dbaba1ee7ffceebe7130a0eb2756))
+* add devspace config and K8s E2E tests ([70c7660](https://github.com/dwmkerr/mock-llm/commit/70c76604bd07f612311137d73c1571089b7d6b52))
+* add devspace config and K8s E2E tests ([76225e2](https://github.com/dwmkerr/mock-llm/commit/76225e27030b4d4321e33b88e37eed9ac4b26cfc))
+* add DISABLE_START_SERVER env var for testing against deployed services ([921bf31](https://github.com/dwmkerr/mock-llm/commit/921bf31e7bb05d75d0eecea065d3c6cc750b3632))
+* add echo agent and A2AAgent interface ([c1206e8](https://github.com/dwmkerr/mock-llm/commit/c1206e80065836556559965612bff534caa7fe89))
+* add echo agent and A2AAgent interface ([a132bae](https://github.com/dwmkerr/mock-llm/commit/a132baec70c5508ba230ac055db25dd0102d59d3))
+* add printConfigSummary helper with improved logging ([e2fcd49](https://github.com/dwmkerr/mock-llm/commit/e2fcd49dfc36a6c11025331f461a545b94aa4982))
+* change port to 6556 (MLLM on dialpad) ([00246ac](https://github.com/dwmkerr/mock-llm/commit/00246ac821114ffba9f08e20560709df6a85fed6))
+* show rule numbers in config logging ([77d1636](https://github.com/dwmkerr/mock-llm/commit/77d1636da5a28a7b5aa50b02ffda74b18c503c9c))
+
+
+### Bug Fixes
+
+* use correct devspace installation method ([7667d70](https://github.com/dwmkerr/mock-llm/commit/7667d7096c29cd7260332e73732ceb7740447513))
+* use import() instead of require() in main.spec.ts ([f2f66d7](https://github.com/dwmkerr/mock-llm/commit/f2f66d7a81e855cddc79b9a39bcfd91abe4686ec))
+* use serviceRef for A2AServer address ([38e0701](https://github.com/dwmkerr/mock-llm/commit/38e0701ff185ea62cb06f0b844be89365bf2d611))
+
+
+### Miscellaneous Chores
+
+* release 0.1.13 ([625a020](https://github.com/dwmkerr/mock-llm/commit/625a020146d1b6a0ea2735a827c7558ba4e7bc38))
+
 ## [0.1.12](https://github.com/dwmkerr/mock-llm/compare/v0.1.11...v0.1.12) (2025-10-14)
 
 
