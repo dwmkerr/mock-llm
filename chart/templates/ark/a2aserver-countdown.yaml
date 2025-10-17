@@ -10,7 +10,11 @@ spec:
     {{- if and .Values.ark.a2a.agentCardHost .Values.ark.a2a.agentCardPort }}
     value: http://{{ .Values.ark.a2a.agentCardHost }}:{{ .Values.ark.a2a.agentCardPort }}/a2a/agents/countdown-agent
     {{- else }}
-    value: http://{{ include "mock-llm.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/a2a/agents/countdown-agent
+    valueFrom:
+      serviceRef:
+        name: {{ include "mock-llm.fullname" . }}
+        port: http
+        path: /a2a/agents/countdown-agent
     {{- end }}
   description: Countdown agent that demonstrates streaming task updates
   pollInterval: {{ .Values.ark.a2a.pollInterval | default "1m" }}

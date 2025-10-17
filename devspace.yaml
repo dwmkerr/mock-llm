@@ -41,6 +41,9 @@ deployments:
           requests:
             memory: "128Mi"
             cpu: "100m"
+        ark:
+          a2a:
+            enabled: true
 
 dev:
   mock-llm:
