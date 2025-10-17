@@ -11,13 +11,17 @@ import { A2AAgent } from './types';
 const agents: A2AAgent[] = [countdownAgent, echoAgent];
 
 export function setupA2ARoutes(app: express.Application, host: string, port: number): void {
+  // Use env vars for agent card URL if provided, otherwise use actual host/port
+  const cardHost = process.env.AGENT_CARD_HOST || host;
+  const cardPort = process.env.AGENT_CARD_PORT || port.toString();
+
   console.log('Loaded A2A agents:');
 
   for (const agent of agents) {
-    // Patch the agent card URL with actual host/port
+    // Patch the agent card URL with configured host/port
     const agentCardWithUrl = {
       ...agent.card,
-      url: `http://${host}:${port}/a2a/agents/${agent.id}`,
+      url: `http://${cardHost}:${cardPort}/a2a/agents/${agent.id}`,
     };
 
     // Create task store and request handler

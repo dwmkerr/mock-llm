@@ -232,3 +232,15 @@ ark:
     #         name: my-config
     #         key: value
     headers: []
+
+  # A2A Agent configuration (optional)
+  # Creates A2AServer CRDs for the echo and countdown agents
+  a2a:
+    # Enable creation of A2AServer resources. Requires Ark CRDs to be installed.
+    enabled: false
+    # Poll interval for agent discovery
+    pollInterval: "1m"
+    # Override host/port used in agent card URLs (optional)
+    # If not specified, uses the service DNS name
+    # agentCardHost: ""
+    # agentCardPort: ""
