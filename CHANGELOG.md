@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.14](https://github.com/dwmkerr/mock-llm/compare/v0.1.13...v0.1.14) (2025-10-17)
+
+
+### Features
+
+* add negative number validation to countdown agent ([a13cdc6](https://github.com/dwmkerr/mock-llm/commit/a13cdc630c5410614f52f82b65e2c8442031828d))
+
 ## [0.1.13](https://github.com/dwmkerr/mock-llm/compare/v0.1.12...v0.1.13) (2025-10-17)
 
 
