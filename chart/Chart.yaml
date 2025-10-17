@@ -2,8 +2,8 @@ apiVersion: v2
 name: mock-llm
 description: A Helm chart for mock-llm - Simple OpenAI compatible Mock API server
 type: application
-version: 0.1.12
-appVersion: 0.1.12
+version: 0.1.13
+appVersion: 0.1.13
 keywords:
   - openai
   - mock
