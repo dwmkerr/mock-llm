@@ -239,7 +239,7 @@ ark:
     # Enable creation of A2AServer resources. Requires Ark CRDs to be installed.
     enabled: false
     # Poll interval for agent discovery
-    pollInterval: "1m"
+    pollInterval: "3s"
     # Override host/port used in agent card URLs (optional)
     # If not specified, uses the service DNS name
     # agentCardHost: ""

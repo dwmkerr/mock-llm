@@ -17,5 +17,5 @@ spec:
         path: /a2a/agents/echo-agent
     {{- end }}
   description: Simple echo agent that responds instantly with the user's message
-  pollInterval: {{ .Values.ark.a2a.pollInterval | default "1m" }}
+  pollInterval: {{ .Values.ark.a2a.pollInterval | default "3s" }}
 {{- end }}
