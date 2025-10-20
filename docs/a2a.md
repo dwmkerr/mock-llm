@@ -19,11 +19,11 @@ mock-llm
 
 ## A2A Agents
 
-**Countdown Agent**
+### Countdown Agent
 
 The countdown agent extracts a number from the message and counts down from 30 seconds, one message update each ten seconds, until the last ten seconds which are each second. If the incoming message includes a number, then that number will be used for the duration of the countdown.
 
-## Testing with curl
+### Testing with curl
 
 Get the agent card:
 
@@ -170,7 +170,7 @@ Example response for negative number:
 }
 ```
 
-**Echo Agent**
+### Echo Agent
 
 The echo agent immediately responds with a `message` object that echo's the user's message.
 
