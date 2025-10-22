@@ -49,15 +49,4 @@ expected='{
 }'
 
 # Fail if response doesn't match expected.
-diff_output=$(diff <(echo "$expected" | jq -S .) <(echo "$response" | jq -S .) 2>&1) && result="passed" || { result="failed:\n${diff_output}"; }
-
-# Reset config to default
-curl -fsSL -X DELETE http://localhost:6556/config > /dev/null
-
-# Report test result
-if [ "$result" = "passed" ]; then
-  echo "passed"
-else
-  echo -e "$result"
-  exit 1
-fi
+diff_output=$(diff <(echo "$expected" | jq -S .) <(echo "$response" | jq -S .) 2>&1) && echo "passed" || { echo -e "failed:\n${diff_output}"; exit 1; }
