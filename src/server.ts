@@ -23,6 +23,15 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   // Setup A2A routes
   setupA2ARoutes(app, host, port);
 
+  // Catch-all for missing A2A agents
+  app.use('/a2a/', (req, res, next) => {
+    res.status(404).json({
+      error: 'AgentNotFound',
+      message: `Agent not found at path: ${req.path}`,
+      status: 404
+    });
+  });
+
   //  Health and readiness checks
   app.get('/health', (_, res) => {
     res.json({ status: 'healthy' });
