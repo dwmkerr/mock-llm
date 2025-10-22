@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import * as path from 'path';
@@ -27,6 +27,11 @@ describe('samples', () => {
     } else {
       done();
     }
+  });
+
+  beforeEach(async () => {
+    // Reset config before each test
+    await execAsync('curl -fsSL -X DELETE http://localhost:6556/config > /dev/null || true');
   });
 
   afterAll((done) => {
