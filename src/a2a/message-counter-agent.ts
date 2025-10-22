@@ -67,7 +67,7 @@ class MessageCounterExecutor implements AgentExecutor {
       kind: Kind.Message,
       role: Role.Agent,
       messageId: uuidv4(),
-      parts: [{ kind: Kind.Text, text:  `${count} message(s) recieved` }],
+      parts: [{ kind: Kind.Text, text:  `${count} message(s) received` }],
       taskId,
       contextId,
     });
