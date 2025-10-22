@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.15](https://github.com/dwmkerr/mock-llm/compare/v0.1.14...v0.1.15) (2025-10-22)
+
+
+### Features
+
+* add message-counter-agent for contextId demonstration ([450f75c](https://github.com/dwmkerr/mock-llm/commit/450f75c004d2b19028e663f0dd76817a5ce616c1))
+* add message-counter-agent for contextId demonstration ([5b91b23](https://github.com/dwmkerr/mock-llm/commit/5b91b2364411a388aad7a061435bf96b521b4b6e))
+
 ## [0.1.14](https://github.com/dwmkerr/mock-llm/compare/v0.1.13...v0.1.14) (2025-10-17)
 
 
