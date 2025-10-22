@@ -174,6 +174,12 @@ Example response for negative number:
 
 The echo agent immediately responds with a `message` object that echo's the user's message.
 
+### Message Counter Agent
+
+The message-counter agent tracks the number of messages received per `contextId`. It demonstrates how A2A agents maintain conversation state using the `contextId` field. Each message sent with the same `contextId` increments the counter, showing that the agent persists state across multiple interactions within the same conversation context.
+
+Example: Send two messages with the same `contextId` and the agent will respond with `"1 message(s) recieved"` then `"2 message(s) recieved"`.
+
 ## A2A Inspector
 
 The [A2A Inspector](https://github.com/a2aproject/a2a-inspector) can be used to communicate with the agent. Run the inspector:
