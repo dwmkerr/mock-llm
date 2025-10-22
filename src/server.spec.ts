@@ -151,6 +151,17 @@ describe('server error handling', () => {
     });
   });
 
+  it('should return AgentNotFound for missing A2A agents', async () => {
+    const response = await fetch(`${baseUrl}/a2a/agents/nonexistent-agent`);
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      error: 'AgentNotFound',
+      message: 'Agent not found at path: /agents/nonexistent-agent',
+      status: 404
+    });
+  });
+
   it('should return JSON 400 for malformed JSON input', async () => {
     const response = await fetch(`${baseUrl}/v1/chat/completions`, {
       method: 'POST',
