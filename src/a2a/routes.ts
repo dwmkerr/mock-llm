@@ -6,9 +6,10 @@ import {
 import { A2AExpressApp } from '@a2a-js/sdk/server/express';
 import { countdownAgent } from './countdown-agent';
 import { echoAgent } from './echo-agent';
+import { messageCounterAgent } from './message-counter-agent';
 import { A2AAgent } from './types';
 
-const agents: A2AAgent[] = [countdownAgent, echoAgent];
+const agents: A2AAgent[] = [countdownAgent, echoAgent, messageCounterAgent];
 
 export function setupA2ARoutes(app: express.Application, host: string, port: number): void {
   // Use env vars for agent card URL if provided, otherwise use actual host/port
