@@ -1,0 +1,9 @@
+{{- if .Values.ark.mcp.enabled -}}
+apiVersion: ark.mckinsey.com/v1prealpha1
+kind: MCPServer
+metadata:
+  name: {{ include "mock-llm.fullname" . }}-mcp
+  labels:
+    {{- include "mock-llm.labels" . | nindent 4 }}
+spec:
+{{- end }}
