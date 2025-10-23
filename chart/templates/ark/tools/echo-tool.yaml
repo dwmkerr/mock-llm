@@ -1,0 +1,20 @@
+{{- if .Values.ark.mcp.enabled -}}
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: {{ include "mock-llm.fullname" . }}-echo-tool
+  labels:
+    {{- include "mock-llm.labels" . | nindent 4 }}
+spec:
+  description: Echo tool for MCP server that returns the input as output
+  type: mcp
+  mcp:
+    mcpServerRef:
+      name: {{ include "mock-llm.fullname" . }}-mcp
+    toolName: echo-tool
+  inputSchema:
+    params:
+      name: echo-tool
+      arguments:
+        text: ""
+{{- end }}
