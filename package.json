@@ -11,6 +11,8 @@
     "build": "tsc",
     "start": "node dist/main.js",
     "dev": "tsx watch src/main.ts",
+    "test-base": "jest",
+    "local:inspect": "npx @modelcontextprotocol/inspector",
     "test": "jest --coverage --coverageDirectory=./artifacts/coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=text-summary --testPathIgnorePatterns=test-samples.spec.ts",
     "test:samples": "npm run build && jest --roots='<rootDir>' --testMatch='**/test-samples.spec.ts' --coverage --coverageDirectory=./artifacts/coverage-samples --coverageReporters=text --coverageReporters=lcov --coverageReporters=text-summary",
     "lint": "eslint src/**/*.ts",
@@ -33,10 +35,12 @@
   },
   "dependencies": {
     "@a2a-js/sdk": "^0.3.4",
+    "@modelcontextprotocol/sdk": "^1.20.1",
     "express": "^5.1.0",
     "jmespath": "^0.16.0",
     "js-yaml": "^4.1.0",
-    "openai": "^4.28.0"
+    "openai": "^4.28.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
