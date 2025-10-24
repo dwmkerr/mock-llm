@@ -174,4 +174,6 @@ spec:
       image: busybox
       command: ['wget']
       args: ['test-chart-mock-llm:6556']
+      securityContext:
+        allowPrivilegeEscalation: false
   restartPolicy: Never
