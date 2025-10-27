@@ -1,4 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
 import { configureTools } from './tools';
 
 export function getMCPServer(): McpServer {

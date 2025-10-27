@@ -1,9 +1,9 @@
+import { randomUUID } from 'node:crypto';
 import express, { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { ErrorCode, isInitializeRequest, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
 
 import { getMCPServer } from './server';
-import { ErrorCode, isInitializeRequest, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
-import { randomUUID } from 'node:crypto';
 
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
