@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.16](https://github.com/dwmkerr/mock-llm/compare/v0.1.15...v0.1.16) (2025-10-27)
+
+
+### Features
+
+* exposing mock mcp-server with echo tool ([63336e0](https://github.com/dwmkerr/mock-llm/commit/63336e05e8089f65ee565a529bc9389e884766d9))
+
+
+### Bug Fixes
+
+* return 404 AgentNotFound for missing A2A agents ([95ece40](https://github.com/dwmkerr/mock-llm/commit/95ece400e76dedaeec0ecc7e0c9640a13dcdf51d))
+* return 404 AgentNotFound for missing A2A agents ([ab0ecee](https://github.com/dwmkerr/mock-llm/commit/ab0ecee7b65dddd762e840476ad1005e306bfc1b))
+
 ## [0.1.15](https://github.com/dwmkerr/mock-llm/compare/v0.1.14...v0.1.15) (2025-10-22)
 
 
