@@ -128,7 +128,7 @@ spec:
       serviceRef:
         name: test-chart-mock-llm
         port: http
-        path: /mcp
+        path: /
   transport: http
 ---
 # Source: mock-llm/templates/ark/tools/echo-tool.yaml
