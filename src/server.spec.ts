@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import * as yaml from 'js-yaml';
+
 import { createServer } from './server';
 import { getDefaultConfig } from './config';
 

@@ -2,10 +2,12 @@ import express from 'express';
 import * as jmespath from 'jmespath';
 import * as yaml from 'js-yaml';
 import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
+
 import { Config, Rule } from './config';
 import { renderTemplate } from './template';
 import { printConfigSummary } from './config-logger';
 import { setupA2ARoutes } from './a2a/routes';
+import { setupHttpMcpServer } from './mcp/http-server';
 
 export function createServer(initialConfig: Config, host: string, port: number) {
   //  Track the current config, which can be changed via '/config' endpoints.
@@ -20,11 +22,12 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     next();
   });
 
-  // Setup A2A routes
+  // Setup A2A and MCP routes
   setupA2ARoutes(app, host, port);
+  setupHttpMcpServer(app);
 
   // Catch-all for missing A2A agents
-  app.use('/a2a/', (req, res, next) => {
+  app.use('/a2a/', (req, res, _next) => {
     res.status(404).json({
       error: 'AgentNotFound',
       message: `Agent not found at path: ${req.path}`,

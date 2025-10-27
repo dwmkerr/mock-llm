@@ -304,3 +304,9 @@ Lint or run tests:
 npm run lint
 npm run test
 ```
+
+Test and inspect the MCP Server running locally:
+
+```bash
+npm run local:inspect
+```

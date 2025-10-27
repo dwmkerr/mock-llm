@@ -247,4 +247,4 @@ ark:
 
   # MCP Server configuration (optional)
   mcp:
-    enabled: false
+    enabled: true
