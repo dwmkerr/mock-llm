@@ -169,6 +169,10 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
   containers:
     - name: wget
       image: busybox
@@ -176,4 +180,8 @@ spec:
       args: ['test-chart-mock-llm:6556']
       securityContext:
         allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
   restartPolicy: Never
