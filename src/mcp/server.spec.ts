@@ -1,4 +1,5 @@
 import { getMcpRouter } from './http-server';
+import { getMCPServer } from './server';
 
 describe('MCP Server', () => {
   it('should expose MCP server routes', async () => {
@@ -15,5 +16,11 @@ describe('MCP Server', () => {
         expect.objectContaining({ route: expect.objectContaining({ path: '/', methods: expect.objectContaining({ delete: true }) }) }),
       ])
     );
-  })
+  });
+
+  it('should create MCP server instance', () => {
+    const server = getMCPServer();
+    expect(server).toBeDefined();
+    expect(server.constructor.name).toBe('McpServer');
+  });
 });

@@ -24,7 +24,7 @@ export function createServer(initialConfig: Config, host: string, port: number) 
 
   // Setup A2A and MCP routes
   setupA2ARoutes(app, host, port);
-  setupHttpMcpServer(app);
+  setupHttpMcpServer(app, host, port);
 
   // Catch-all for missing A2A agents
   app.use('/a2a/', (req, res, _next) => {
