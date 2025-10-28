@@ -9,8 +9,10 @@ set -eo pipefail
 
 # Step 1: Initialize session
 echo "Initializing MCP session..."
-init_response=$(curl -fsSL -X POST http://localhost:6556/mcp/ \
+# MCP Streamable HTTP returns event stream format, extract JSON from "data:" line
+init_response=$(curl -fsSL -N -X POST http://localhost:6556/mcp/ \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -D /tmp/mcp-headers.txt \
   -d '{
     "jsonrpc": "2.0",
@@ -24,7 +26,7 @@ init_response=$(curl -fsSL -X POST http://localhost:6556/mcp/ \
       }
     },
     "id": 1
-  }')
+  }' | grep "^data: " | head -1 | sed 's/^data: //')
 
 # Extract session ID from response headers
 session_id=$(grep -i "mcp-session-id:" /tmp/mcp-headers.txt | cut -d' ' -f2 | tr -d '\r')
@@ -36,14 +38,15 @@ echo "Session ID: $session_id"
 
 # Step 2: List available tools
 echo "Listing available tools..."
-tools_response=$(curl -fsSL -X POST http://localhost:6556/mcp/ \
+tools_response=$(curl -fsSL -N -X POST http://localhost:6556/mcp/ \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "mcp-session-id: $session_id" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/list",
     "id": 2
-  }')
+  }' | grep "^data: " | head -1 | sed 's/^data: //')
 
 # Verify echo tool exists
 tool_name=$(echo "$tools_response" | jq -r '.result.tools[0].name')
@@ -55,8 +58,9 @@ echo "Found tool: $tool_name"
 
 # Step 3: Call the echo tool
 echo "Calling echo tool..."
-call_response=$(curl -fsSL -X POST http://localhost:6556/mcp/ \
+call_response=$(curl -fsSL -N -X POST http://localhost:6556/mcp/ \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "mcp-session-id: $session_id" \
   -d '{
     "jsonrpc": "2.0",
@@ -68,7 +72,7 @@ call_response=$(curl -fsSL -X POST http://localhost:6556/mcp/ \
       }
     },
     "id": 3
-  }')
+  }' | grep "^data: " | head -1 | sed 's/^data: //')
 
 # Verify the echoed text
 echoed_text=$(echo "$call_response" | jq -r '.result.content[0].text')
