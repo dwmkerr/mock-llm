@@ -20,6 +20,8 @@ The server can be configured to provide different responses based on the input, 
     - [Updating Configuration](#updating-configuration)
     - [Health & Readiness Checks](#health--readiness-checks)
     - [Template Variables](#template-variables)
+- [MCP (Model Context Protocol) Mocking](#mcp-model-context-protocol-mocking)
+- [A2A (Agent to Agent Protocol) Mocking](#a2a-agent-to-agent-protocol-mocking)
 - [Deploying to Kubernetes with Helm](#deploying-to-kubernetes-with-helm)
 - [Examples](#examples)
 - [Developer Guide](#developer-guide)
@@ -203,6 +205,14 @@ Objects and arrays are automatically JSON-stringified. Primitives are returned a
 "auth": "{{jmes request headers.authorization}}"    // "Bearer sk-..."
 "apikey": "{{jmes request query.apikey}}"           // "test-123"
 ```
+
+## MCP (Model Context Protocol) Mocking
+
+Mock-LLM exposes MCP servers and tools which support testing the MCP protocol, details are in the [MCP Documentation](docs/mcp.md).
+
+## A2A (Agent to Agent Protocol) Mocking
+
+Mock-LLM exposes A2A servers and tools which support testing the A2A protocol, details are in the [A2A Documentation](docs/a2a.md).
 
 ## Deploying to Kubernetes with Helm
 

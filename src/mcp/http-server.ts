@@ -7,8 +7,10 @@ import { getMCPServer } from './server';
 
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
-export function setupHttpMcpServer(app: express.Express): void {
-  console.log('Loading MCP server');
+export function setupHttpMcpServer(app: express.Express, host: string, port: number): void {
+  console.log('Loaded MCP server:');
+  console.log(`  - echo-mcp: http://${host}:${port}/mcp`);
+  console.log('    - echo: this tool echoes back the provided request');
 
   app.use('/mcp', getMcpRouter());
 }

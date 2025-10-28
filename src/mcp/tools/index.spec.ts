@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { ListToolsResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import { ListToolsResultSchema, CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 
 import { configureTools } from ".";
@@ -21,6 +21,27 @@ describe('MCP Tools', () => {
         name: 'echo',
         description: 'this tool echoes back the provided request',
       })
+    ]);
+  });
+
+  it('echo tool should return the provided text', async () => {
+    const client = await getMcpServerClientStub();
+
+    const response = await client.request({
+      method: 'tools/call',
+      params: {
+        name: 'echo',
+        arguments: {
+          text: 'Hello, MCP!'
+        }
+      }
+    }, CallToolResultSchema);
+
+    expect(response.content).toEqual([
+      {
+        type: 'text',
+        text: 'Hello, MCP!'
+      }
     ]);
   });
 });
