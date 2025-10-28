@@ -24,11 +24,14 @@ The echo tool accepts text input and returns it unchanged, useful for testing ba
 
 ### Testing with curl
 
+The MCP server uses Streamable HTTP transport, which returns responses in event stream format.
+
 Initialize a session:
 
 ```bash
-curl -X POST http://localhost:6556/mcp/ \
+curl -N -X POST http://localhost:6556/mcp/ \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -d '{
     "jsonrpc": "2.0",
     "method": "initialize",
@@ -44,13 +47,21 @@ curl -X POST http://localhost:6556/mcp/ \
   }'
 ```
 
-Response will include a session ID in the `mcp-session-id` header.
+Response (event stream format):
+
+```
+event: message
+data: {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"echo-mcp","version":"1.0.0"}}}
+```
+
+The session ID is returned in the `mcp-session-id` response header.
 
 List available tools (use session ID from previous response):
 
 ```bash
-curl -X POST http://localhost:6556/mcp/ \
+curl -N -X POST http://localhost:6556/mcp/ \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "mcp-session-id: YOUR-SESSION-ID" \
   -d '{
     "jsonrpc": "2.0",
@@ -62,8 +73,9 @@ curl -X POST http://localhost:6556/mcp/ \
 Call the echo tool:
 
 ```bash
-curl -X POST http://localhost:6556/mcp/ \
+curl -N -X POST http://localhost:6556/mcp/ \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "mcp-session-id: YOUR-SESSION-ID" \
   -d '{
     "jsonrpc": "2.0",
@@ -80,19 +92,9 @@ curl -X POST http://localhost:6556/mcp/ \
 
 Response:
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 3,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "Hello, MCP!"
-      }
-    ]
-  }
-}
+```
+event: message
+data: {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"Hello, MCP!"}]}}
 ```
 
 Terminate the session:
