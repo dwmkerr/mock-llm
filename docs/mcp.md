@@ -10,10 +10,10 @@ Start the server. Available MCP endpoint will be shown:
 npm install -g mock-llm
 mock-llm
 
+# Loaded MCP server:
+#   - echo-mcp: http://0.0.0.0:6556/mcp
+#     - echo: this tool echoes back the provided request
 # @dwmkerr/mock-llm v0.1.x server running on 0.0.0.0:6556
-# MCP server available at: http://localhost:6556/mcp
-# TODO note I have added this:
-#   Tool 1: <Tool Name> - <Tool description>
 ```
 
 ## MCP Tools
