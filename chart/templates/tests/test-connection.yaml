@@ -7,6 +7,10 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
   containers:
     - name: wget
       image: busybox
@@ -14,4 +18,8 @@ spec:
       args: ['{{ include "mock-llm.fullname" . }}:{{ .Values.service.port }}']
       securityContext:
         allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
   restartPolicy: Never
