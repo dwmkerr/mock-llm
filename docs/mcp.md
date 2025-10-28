@@ -32,6 +32,7 @@ Initialize a session:
 curl -N -X POST http://localhost:6556/mcp/ \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
+  -D - \
   -d '{
     "jsonrpc": "2.0",
     "method": "initialize",
@@ -47,14 +48,18 @@ curl -N -X POST http://localhost:6556/mcp/ \
   }'
 ```
 
-Response (event stream format):
+Response (headers and event stream):
 
 ```
+HTTP/1.1 200 OK
+mcp-session-id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+Content-Type: text/event-stream
+
 event: message
 data: {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":true}},"serverInfo":{"name":"echo-mcp","version":"1.0.0"}}}
 ```
 
-The session ID is returned in the `mcp-session-id` response header.
+Use the `mcp-session-id` value from the response header in subsequent requests.
 
 List available tools (use session ID from previous response):
 
