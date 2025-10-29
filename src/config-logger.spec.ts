@@ -6,6 +6,7 @@ describe('printConfigSummary', () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
     const config: Config = {
+      streaming: { chunkSize: 50, chunkIntervalMs: 50 },
       rules: [
         { path: '/v1/chat/completions', match: '@', response: { status: 200, content: '{}' } },
         { path: '/v1/models', match: 'contains(path, "models")', response: { status: 200, content: '{}' } }

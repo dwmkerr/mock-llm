@@ -13,12 +13,22 @@ export interface Rule {
   response: Response;
 }
 
+export interface StreamingConfig {
+  chunkSize: number;
+  chunkIntervalMs: number;
+}
+
 export interface Config {
+  streaming: StreamingConfig;
   rules: Rule[];
 }
 
 export function getDefaultConfig(): Config {
   return {
+    streaming: {
+      chunkSize: 50,
+      chunkIntervalMs: 50
+    },
     rules: [
       {
         path: '/v1/chat/completions',
