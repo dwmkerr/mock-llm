@@ -10,25 +10,17 @@ function splitIntoChunks(content: string, chunkSize: number): string[] {
   return chunks.length > 0 ? chunks : [''];
 }
 
-function createChunk(
+function createChunks(
   id: string,
   model: string,
   created: number,
-  content: string,
-  isFirst: boolean,
-  isLast: boolean
-): ChatCompletionChunk {
-  const delta: ChatCompletionChunk.Choice.Delta = {};
-
-  if (isFirst) {
-    delta.role = 'assistant';
+  contentChunks: string[]
+): ChatCompletionChunk[] {
+  if (contentChunks.length === 0) {
+    return [];
   }
 
-  if (content) {
-    delta.content = content;
-  }
-
-  return {
+  const chunks: ChatCompletionChunk[] = contentChunks.map(content => ({
     id,
     object: 'chat.completion.chunk',
     created,
@@ -36,11 +28,19 @@ function createChunk(
     choices: [
       {
         index: 0,
-        delta,
-        finish_reason: isLast ? 'stop' : null
+        delta: { content },
+        finish_reason: null
       }
     ]
-  };
+  }));
+
+  // Augment first chunk with role
+  chunks[0].choices[0].delta.role = 'assistant';
+
+  // Augment last chunk with finish_reason
+  chunks[chunks.length - 1].choices[0].finish_reason = 'stop';
+
+  return chunks;
 }
 
 export function streamResponse(
@@ -69,16 +69,14 @@ export function streamResponse(
   const model = responseJson.model || 'gpt-4';
   const created = responseJson.created || Math.floor(Date.now() / 1000);
 
-  // Split content into chunks
-  const chunks = splitIntoChunks(content, config.chunkSize);
+  // Create chunks from content
+  const contentChunks = splitIntoChunks(content, config.chunkSize);
+  const chunks = createChunks(id, model, created, contentChunks);
 
   let index = 0;
   const interval = setInterval(() => {
     if (index < chunks.length) {
-      const isFirst = index === 0;
-      const isLast = index === chunks.length - 1;
-      const chunk = createChunk(id, model, created, chunks[index], isFirst, isLast);
-      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+      res.write(`data: ${JSON.stringify(chunks[index])}\n\n`);
       index++;
     } else {
       // Send [DONE]
