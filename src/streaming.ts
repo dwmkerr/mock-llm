@@ -1,20 +1,6 @@
 import type { Response } from 'express';
+import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
 import type { StreamingConfig } from './config';
-
-interface StreamChunk {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: Array<{
-    index: number;
-    delta: {
-      content?: string;
-      role?: string;
-    };
-    finish_reason: string | null;
-  }>;
-}
 
 function splitIntoChunks(content: string, chunkSize: number): string[] {
   const chunks: string[] = [];
@@ -31,8 +17,8 @@ function createChunk(
   content: string,
   isFirst: boolean,
   isLast: boolean
-): StreamChunk {
-  const delta: { content?: string; role?: string } = {};
+): ChatCompletionChunk {
+  const delta: ChatCompletionChunk.Choice.Delta = {};
 
   if (isFirst) {
     delta.role = 'assistant';
