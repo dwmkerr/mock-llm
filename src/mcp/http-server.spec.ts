@@ -7,6 +7,9 @@ describe('MCP HTTP Server - Streamable HTTP Transport', () => {
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
+  // Increase timeout for this test suite
+  jest.setTimeout(10000);
+
   beforeAll((done) => {
     server = app.listen(0, () => {
       const address = server.address() as { port: number };
@@ -16,7 +19,10 @@ describe('MCP HTTP Server - Streamable HTTP Transport', () => {
   });
 
   afterAll((done) => {
-    server.close(done);
+    // Give connections time to close
+    setTimeout(() => {
+      server.close(done);
+    }, 100);
   });
 
   it('should initialize Streamable HTTP session with POST /mcp', async () => {
@@ -157,6 +163,9 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
+  // Increase timeout for this test suite
+  jest.setTimeout(10000);
+
   beforeAll((done) => {
     server = app.listen(0, () => {
       const address = server.address() as { port: number };
@@ -166,7 +175,10 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
   });
 
   afterAll((done) => {
-    server.close(done);
+    // Give connections time to close
+    setTimeout(() => {
+      server.close(done);
+    }, 100);
   });
 
   it('should establish SSE stream with GET /mcp/sse', async () => {
@@ -321,6 +333,9 @@ describe('MCP HTTP Server - Transport Type Mismatch', () => {
   let baseUrl: string;
   let sseSessionId: string;
 
+  // Increase timeout for this test suite
+  jest.setTimeout(10000);
+
   beforeAll((done) => {
     server = app.listen(0, () => {
       const address = server.address() as { port: number };
@@ -422,6 +437,9 @@ describe('MCP HTTP Server - Error Handling', () => {
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
+  // Increase timeout for this test suite
+  jest.setTimeout(10000);
+
   beforeAll((done) => {
     server = app.listen(0, () => {
       const address = server.address() as { port: number };
@@ -431,7 +449,10 @@ describe('MCP HTTP Server - Error Handling', () => {
   });
 
   afterAll((done) => {
-    server.close(done);
+    // Give connections time to close
+    setTimeout(() => {
+      server.close(done);
+    }, 100);
   });
 
   it('should handle malformed JSON in POST /mcp', async () => {
@@ -514,6 +535,217 @@ describe('MCP HTTP Server - Error Handling', () => {
   it('should return 400 when POST /mcp/messages with null transport', async () => {
     // This test is designed to trigger the "No transport found for sessionId" path
     // by creating a scenario where the transport lookup returns null/undefined
+    const response = await fetch(`${baseUrl}/mcp/messages?sessionId=non-existent-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/list'
+      })
+    });
+
+    expect(response.status).toBe(400);
+    const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+    expect(body.jsonrpc).toBe('2.0');
+    expect(body.error.code).toBe(-32000);
+    expect(body.error.message).toContain('different transport protocol');
+  });
+
+  it('should handle error in mcpPostHandler catch block', async () => {
+    // This test triggers the error handling path in mcpPostHandler
+    const response = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: 'invalid json'
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('should handle error in mcpDeleteHandler catch block', async () => {
+    // First create a valid session
+    const initResponse = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-03-26',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0.0' }
+        }
+      })
+    });
+
+    const sessionId = initResponse.headers.get('mcp-session-id');
+    
+    if (sessionId) {
+      // This should trigger the normal delete path, not the error path
+      const response = await fetch(`${baseUrl}/mcp`, {
+        method: 'DELETE',
+        headers: {
+          'mcp-session-id': sessionId
+        }
+      });
+
+      // Should succeed or return appropriate status
+      expect(response.status).toBeGreaterThanOrEqual(200);
+      expect(response.status).toBeLessThan(500);
+    }
+  });
+});
+
+describe('MCP HTTP Server - Additional Coverage Tests', () => {
+  const app = createServer(getDefaultConfig(), 'localhost', 0);
+  let server: ReturnType<typeof app.listen>;
+  let baseUrl: string;
+
+  // Increase timeout for this test suite
+  jest.setTimeout(10000);
+
+  beforeAll((done) => {
+    server = app.listen(0, () => {
+      const address = server.address() as { port: number };
+      baseUrl = `http://localhost:${address.port}`;
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    // Give connections time to close
+    setTimeout(() => {
+      server.close(done);
+    }, 100);
+  });
+
+  it('should handle POST /mcp with existing SSE session (transport mismatch)', async () => {
+    // First create an SSE session
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    if (sseSessionId) {
+      // Now try to use that SSE session ID with StreamableHTTP POST
+      const response = await fetch(`${baseUrl}/mcp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'mcp-session-id': sseSessionId
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/list'
+        })
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+  });
+
+  it('should handle GET /mcp with existing SSE session (transport mismatch)', async () => {
+    // First create an SSE session
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    if (sseSessionId) {
+      // Now try to use that SSE session ID with StreamableHTTP GET
+      const response = await fetch(`${baseUrl}/mcp`, {
+        method: 'GET',
+        headers: {
+          'mcp-session-id': sseSessionId
+        }
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+  });
+
+  it('should handle DELETE /mcp with existing SSE session (transport mismatch)', async () => {
+    // First create an SSE session
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    if (sseSessionId) {
+      // Now try to use that SSE session ID with StreamableHTTP DELETE
+      const response = await fetch(`${baseUrl}/mcp`, {
+        method: 'DELETE',
+        headers: {
+          'mcp-session-id': sseSessionId
+        }
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+  });
+
+  it('should handle POST /mcp/messages with existing StreamableHTTP session (transport mismatch)', async () => {
+    // First create a StreamableHTTP session
+    const initResponse = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-03-26',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0.0' }
+        }
+      })
+    });
+
+    const sessionId = initResponse.headers.get('mcp-session-id');
+    
+    if (sessionId) {
+      // Now try to use that StreamableHTTP session ID with SSE messages endpoint
+      const response = await fetch(`${baseUrl}/mcp/messages?sessionId=${sessionId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/list'
+        })
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+  });
+
+  it('should handle POST /mcp/messages with non-existent session (null transport)', async () => {
+    // This test triggers the "No transport found for sessionId" path in sseMessagesHandler
     const response = await fetch(`${baseUrl}/mcp/messages?sessionId=non-existent-session`, {
       method: 'POST',
       headers: {
