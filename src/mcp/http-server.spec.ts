@@ -162,6 +162,7 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
   const app = createServer(getDefaultConfig(), 'localhost', 0);
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
+  const activeSSEConnections: AbortController[] = [];
 
   // Increase timeout for this test suite
   jest.setTimeout(10000);
@@ -174,16 +175,26 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     });
   });
 
-  afterAll((done) => {
+  afterAll(async (done) => {
+    // Abort all active SSE connections
+    for (const controller of activeSSEConnections) {
+      controller.abort();
+    }
+    activeSSEConnections.length = 0;
+    
     // Give connections time to close
     setTimeout(() => {
       server.close(done);
-    }, 100);
+    }, 200);
   });
 
   it('should establish SSE stream with GET /mcp/sse', async () => {
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
     const response = await fetch(`${baseUrl}/mcp/sse`, {
-      method: 'GET'
+      method: 'GET',
+      signal: abortController.signal
     });
 
     expect(response.status).toBe(200);
@@ -193,7 +204,13 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     expect(reader).toBeTruthy();
     
     if (reader) {
-      reader.cancel();
+      await reader.cancel();
+    }
+    
+    // Remove from active connections after test
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
     }
   });
 
@@ -256,8 +273,21 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
 
   it('should return 400 when using StreamableHTTP with SSE session ID', async () => {
     // First create an SSE session
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
     const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    // Abort the SSE connection immediately after getting session ID
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
     
     if (sseSessionId) {
       // Now try to use that SSE session ID with StreamableHTTP
@@ -284,8 +314,20 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
 
   it('should return 400 for GET /mcp with SSE session ID', async () => {
     // First create an SSE session
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
     const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
     
     if (sseSessionId) {
       // Now try to use that SSE session ID with StreamableHTTP GET
@@ -306,8 +348,20 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
 
   it('should return 400 for DELETE /mcp with SSE session ID', async () => {
     // First create an SSE session
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
     const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
     
     if (sseSessionId) {
       // Now try to use that SSE session ID with StreamableHTTP DELETE
@@ -609,6 +663,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
   const app = createServer(getDefaultConfig(), 'localhost', 0);
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
+  const activeSSEConnections: AbortController[] = [];
 
   // Increase timeout for this test suite
   jest.setTimeout(10000);
@@ -621,17 +676,35 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     });
   });
 
-  afterAll((done) => {
+  afterAll(async (done) => {
+    // Abort all active SSE connections
+    for (const controller of activeSSEConnections) {
+      controller.abort();
+    }
+    activeSSEConnections.length = 0;
+    
     // Give connections time to close
     setTimeout(() => {
       server.close(done);
-    }, 100);
+    }, 200);
   });
 
   it('should handle POST /mcp with existing SSE session (transport mismatch)', async () => {
     // First create an SSE session
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
     const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
     
     if (sseSessionId) {
       // Now try to use that SSE session ID with StreamableHTTP POST
@@ -658,8 +731,20 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
 
   it('should handle GET /mcp with existing SSE session (transport mismatch)', async () => {
     // First create an SSE session
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
     const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
     
     if (sseSessionId) {
       // Now try to use that SSE session ID with StreamableHTTP GET
@@ -680,8 +765,20 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
 
   it('should handle DELETE /mcp with existing SSE session (transport mismatch)', async () => {
     // First create an SSE session
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { method: 'GET' });
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
     const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
     
     if (sseSessionId) {
       // Now try to use that SSE session ID with StreamableHTTP DELETE
