@@ -442,6 +442,7 @@ describe('MCP HTTP Server - Transport Type Mismatch', () => {
   let server: ReturnType<typeof app.listen>;
   let baseUrl: string;
   let sseSessionId: string;
+  let sseAbortController: AbortController;
 
   // Increase timeout for this test suite
   jest.setTimeout(10000);
@@ -452,17 +453,19 @@ describe('MCP HTTP Server - Transport Type Mismatch', () => {
       baseUrl = `http://localhost:${address.port}`;
       
       // Establish SSE session first
-      const abortController = new AbortController();
+      sseAbortController = new AbortController();
       fetch(`${baseUrl}/mcp/sse`, { 
         method: 'GET',
-        signal: abortController.signal 
-      }).then((sseResponse) => {
-        const sessionIdHeader = sseResponse.headers.get('mcp-session-id');
+        signal: sseAbortController.signal 
+      }).then(async (sseResponse) => {
+        // Wait for headers to be set
+        await new Promise(resolve => setTimeout(resolve, 150));
+        const sessionIdHeader = sseResponse.headers.get('mcp-session-id') || 
+                                sseResponse.headers.get('x-mcp-session-id');
         if (sessionIdHeader) {
           sseSessionId = sessionIdHeader;
         }
-        // Abort the SSE connection to allow server to close cleanly
-        abortController.abort();
+        // Don't abort - keep connection alive for tests (will abort in afterAll)
         done();
       }).catch(() => {
         done();
@@ -471,10 +474,14 @@ describe('MCP HTTP Server - Transport Type Mismatch', () => {
   });
 
   afterAll((done) => {
+    // Abort SSE connection before closing server
+    if (sseAbortController) {
+      sseAbortController.abort();
+    }
     // Give some time for SSE connections to close
     setTimeout(() => {
       server.close(done);
-    }, 100);
+    }, 200);
   });
 
   it('should return 400 when using StreamableHTTP endpoint with SSE session ID', async () => {
@@ -756,7 +763,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
   });
 
   it('should handle POST /mcp with existing SSE session (transport mismatch)', async () => {
-    // First create an SSE session
+    // First create an SSE session and keep it alive
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
@@ -764,16 +771,18 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
       method: 'GET',
       signal: abortController.signal
     });
-    const sseSessionId = sseResponse.headers.get('mcp-session-id');
     
-    abortController.abort();
-    const index = activeSSEConnections.indexOf(abortController);
-    if (index > -1) {
-      activeSSEConnections.splice(index, 1);
-    }
+    // Wait for headers and session to be created - SSE responses need time
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
+    const sseSessionId = sseResponse.headers.get('mcp-session-id') || 
+                         sseResponse.headers.get('x-mcp-session-id');
+    
+    // If we don't have session ID from headers, fail with descriptive message
+    expect(sseSessionId).toBeTruthy();
     
     if (sseSessionId) {
-      // Now try to use that SSE session ID with StreamableHTTP POST
+      // Now try to use that SSE session ID with StreamableHTTP POST while keeping SSE connection alive
       const response = await fetch(`${baseUrl}/mcp`, {
         method: 'POST',
         headers: {
@@ -788,19 +797,16 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
       });
 
       expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
       
-      // GET/DELETE handlers return JSON if session exists but transport mismatches, 
-      // or plain text if session doesn't exist. Try JSON first.
-      const contentType = response.headers.get('content-type');
-      if (contentType?.includes('application/json')) {
-        const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
-        expect(body.jsonrpc).toBe('2.0');
-        expect(body.error.code).toBe(-32000);
-        expect(body.error.message).toContain('different transport protocol');
-      } else {
-        // If plain text, session might not exist yet - check error message
-        const text = await response.text();
-        expect(text).toMatch(/Invalid|Session|transport/i);
+      // Now abort the SSE connection after the test
+      abortController.abort();
+      const index = activeSSEConnections.indexOf(abortController);
+      if (index > -1) {
+        activeSSEConnections.splice(index, 1);
       }
     }
   });
