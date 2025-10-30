@@ -8,6 +8,7 @@ import { renderTemplate } from './template';
 import { printConfigSummary } from './config-logger';
 import { setupA2ARoutes } from './a2a/routes';
 import { setupHttpMcpServer } from './mcp/http-server';
+import { streamResponse } from './streaming';
 
 export function createServer(initialConfig: Config, host: string, port: number) {
   //  Track the current config, which can be changed via '/config' endpoints.
@@ -76,6 +77,7 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   //  Handle chat completion requests.
   app.post(/.*/, (req, res) => {
     const requestBody: ChatCompletionCreateParamsBase = req.body;
+    const isStreaming = requestBody.stream === true;
 
     //  Filter rules by path (typically 'v1/completions').
     //  If no rules for this path we fail.
@@ -115,7 +117,14 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     //  Render the response, expanding any expressions from the matched rule.
     const matchedRule = matchingRules[matchingRules.length - 1];
     const body = renderTemplate(matchedRule.response.content, { request });
-    return res.status(matchedRule.response.status).json(JSON.parse(body));
+    const parsed = JSON.parse(body);
+
+    // Handle streaming or regular response
+    if (isStreaming) {
+      return streamResponse(res, parsed, matchedRule.response.status, currentConfig.streaming);
+    } else {
+      return res.status(matchedRule.response.status).json(parsed);
+    }
   });
 
   // Catch-all 404 handler

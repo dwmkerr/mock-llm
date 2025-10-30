@@ -7,6 +7,10 @@ describe('config', () => {
       const config = getDefaultConfig();
 
       expect(config).toEqual({
+        streaming: {
+          chunkSize: 50,
+          chunkIntervalMs: 50
+        },
         rules: [
           {
             path: '/v1/chat/completions',

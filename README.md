@@ -206,6 +206,37 @@ Objects and arrays are automatically JSON-stringified. Primitives are returned a
 "apikey": "{{jmes request query.apikey}}"           // "test-123"
 ```
 
+### Streaming Configuration
+
+Mock-LLM supports streaming responses when clients send `stream: true` in their requests. Streaming behavior is configured globally:
+
+```yaml
+streaming:
+  chunkSize: 50         # characters per chunk (default: 50)
+  chunkIntervalMs: 50   # milliseconds between chunks (default: 50)
+
+rules:
+  - path: "/v1/chat/completions"
+    match: "@"
+    # etc...
+```
+
+When clients request streaming, Mock-LLM returns Server-Sent Events (SSE) with `Content-Type: text/event-stream`:
+
+```javascript
+const stream = await client.chat.completions.create({
+  model: 'gpt-4',
+  messages: [{ role: 'user', content: 'Hello' }],
+  stream: true  // Enables streaming
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+```
+
+This enables deterministic testing of streaming protocol responses. Errors conditions can also be tested - error responses are sent as per the [OpenAI Streaming Specification](https://platform.openai.com/docs/api-reference/chat-streaming/streaming).
+
 ## MCP (Model Context Protocol) Mocking
 
 Mock-LLM exposes MCP servers and tools which support testing the MCP protocol, details are in the [MCP Documentation](docs/mcp.md).
