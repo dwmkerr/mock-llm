@@ -175,7 +175,7 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     });
   });
 
-  afterAll(async (done) => {
+  afterAll((done) => {
     // Abort all active SSE connections
     for (const controller of activeSSEConnections) {
       controller.abort();
@@ -676,7 +676,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     });
   });
 
-  afterAll(async (done) => {
+  afterAll((done) => {
     // Abort all active SSE connections
     for (const controller of activeSSEConnections) {
       controller.abort();
