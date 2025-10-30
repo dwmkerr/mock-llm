@@ -20,11 +20,13 @@ The server can be configured to provide different responses based on the input, 
     - [Updating Configuration](#updating-configuration)
     - [Health & Readiness Checks](#health--readiness-checks)
     - [Template Variables](#template-variables)
+    - [Streaming Configuration](#streaming-configuration)
 - [MCP (Model Context Protocol) Mocking](#mcp-model-context-protocol-mocking)
 - [A2A (Agent to Agent Protocol) Mocking](#a2a-agent-to-agent-protocol-mocking)
 - [Deploying to Kubernetes with Helm](#deploying-to-kubernetes-with-helm)
 - [Examples](#examples)
 - [Developer Guide](#developer-guide)
+- [Samples](#samples)
 
 <!-- vim-markdown-toc -->
 
@@ -351,3 +353,25 @@ Test and inspect the MCP Server running locally:
 ```bash
 npm run local:inspect
 ```
+
+## Samples
+
+Each sample below is in the form of an extremely minimal script that shows:
+
+1. How to configure mock-llm for a specific scenario
+2. How to run the scenario
+3. How to validate the results
+
+These can be a reference for your own tests. Each sample is also run as part of the project's build pipeline.
+
+| Sample | Description |
+|--------|-------------|
+| [01-echo-message.sh](samples/01-echo-message.sh) | Assert a response from an LLM. |
+| [02-error-401.sh](samples/02-error-401.sh) | Verify error handling scenario. |
+| [03-system-message-in-conversation.sh](samples/03-system-message-in-conversation.sh) | Test system message handling in conversations. |
+| [04-headers-validation.sh](samples/04-headers-validation.sh) | Test custom HTTP header validation. |
+| [05-a2a-countdown-agent.sh](samples/05-a2a-countdown-agent.sh) | Test A2A blocking task operations. |
+| [06-a2a-echo-agent.sh](samples/06-a2a-echo-agent.sh) | Test A2A message handling. |
+| [07-a2a-message-context.sh](samples/07-a2a-message-context.sh) | Test A2A message context and history. |
+| [08-mcp-echo-tool.sh](samples/08-mcp-echo-tool.sh) | Test MCP tool invocation. |
+| [09-token-usage.sh](samples/09-token-usage.sh) | Test token usage tracking. |
