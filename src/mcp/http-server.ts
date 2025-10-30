@@ -100,7 +100,6 @@ const mcpPostHandler = async (req: Request, res: Response) => {
         id: null
       });
     }
-    /* istanbul ignore next 3 - Headers already sent error path is hard to test */
   }
 };
 
@@ -165,6 +164,9 @@ const sseGetHandler = async (req: Request, res: Response) => {
   console.log('Received GET request to /mcp/sse (HTTP+SSE transport)');
   const transport = new SSEServerTransport('/mcp/messages', res);
   transports[transport.sessionId] = transport;
+  
+  // Set session ID in headers for client access
+  res.setHeader('mcp-session-id', transport.sessionId);
 
   res.on('close', () => {
     delete transports[transport.sessionId];

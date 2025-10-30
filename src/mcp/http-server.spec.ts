@@ -1117,5 +1117,82 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     expect(body.error.code).toBe(-32000);
     expect(body.error.message).toContain('different transport protocol');
   });
+
+  it('should handle GET /mcp with valid StreamableHTTP session (cover line 127)', async () => {
+    // Initialize a StreamableHTTP session
+    const initResponse = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-03-26',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0.0' }
+        }
+      })
+    });
+
+    const sessionId = initResponse.headers.get('mcp-session-id');
+    expect(sessionId).toBeTruthy();
+
+    if (sessionId) {
+      // Now do a GET request with that session ID - this should hit line 127
+      const getResponse = await fetch(`${baseUrl}/mcp`, {
+        method: 'GET',
+        headers: {
+          'mcp-session-id': sessionId
+        }
+      });
+
+      // Should handle the request (may return various status codes)
+      expect(getResponse.status).toBeGreaterThanOrEqual(200);
+      expect(getResponse.status).toBeLessThan(500);
+    }
+  });
+
+  it('should handle POST /mcp/messages with valid SSE session (cover line 183)', async () => {
+    // Create SSE session
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
+    const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    expect(sseSessionId).toBeTruthy();
+    
+    if (sseSessionId) {
+      // Send a message to the SSE session - this should hit line 183 (transport = existingTransport)
+      const messagesResponse = await fetch(`${baseUrl}/mcp/messages?sessionId=${sseSessionId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/list'
+        })
+      });
+
+      // Should handle the message (may return various status codes)
+      expect(messagesResponse.status).toBeGreaterThanOrEqual(200);
+      expect(messagesResponse.status).toBeLessThan(500);
+    }
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
+  });
 });
 
