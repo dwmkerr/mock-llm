@@ -3,7 +3,8 @@ import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
 import type { StreamingConfig } from './config';
 
 function splitIntoChunks(content: string, chunkSize: number): string[] {
-  const numChunks = Math.ceil(content.length / chunkSize) || 1;
+  // Ensure at least one chunk for empty content
+  const numChunks = Math.max(1, Math.ceil(content.length / chunkSize));
   return Array.from(
     { length: numChunks },
     (_, i) => content.slice(i * chunkSize, (i + 1) * chunkSize)
