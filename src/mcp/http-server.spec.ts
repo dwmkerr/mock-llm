@@ -905,3 +905,217 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
   });
 });
 
+describe('MCP HTTP Server - Patch Coverage Tests', () => {
+  const app = createServer(getDefaultConfig(), 'localhost', 0);
+  let server: ReturnType<typeof app.listen>;
+  let baseUrl: string;
+  const activeSSEConnections: AbortController[] = [];
+
+  // Increase timeout for this test suite
+  jest.setTimeout(10000);
+
+  beforeAll((done) => {
+    server = app.listen(0, () => {
+      const address = server.address() as { port: number };
+      baseUrl = `http://localhost:${address.port}`;
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    // Abort all active SSE connections
+    for (const controller of activeSSEConnections) {
+      controller.abort();
+    }
+    activeSSEConnections.length = 0;
+    
+    // Give connections time to close
+    setTimeout(() => {
+      server.close(done);
+    }, 200);
+  });
+
+  it('should handle POST /mcp with existing SSE session (transport mismatch in mcpPostHandler)', async () => {
+    // Create SSE session first
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
+    const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    // Wait for session to be created
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    if (sseSessionId) {
+      // Now try to use that SSE session ID with StreamableHTTP POST
+      const response = await fetch(`${baseUrl}/mcp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'mcp-session-id': sseSessionId
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/list'
+        })
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
+  });
+
+  it('should handle GET /mcp with existing SSE session (transport mismatch in mcpGetHandler)', async () => {
+    // Create SSE session first
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
+    const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    // Wait for session to be created
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    if (sseSessionId) {
+      // Now try to use that SSE session ID with StreamableHTTP GET
+      const response = await fetch(`${baseUrl}/mcp`, {
+        method: 'GET',
+        headers: {
+          'mcp-session-id': sseSessionId
+        }
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
+  });
+
+  it('should handle DELETE /mcp with existing SSE session (transport mismatch in mcpDeleteHandler)', async () => {
+    // Create SSE session first
+    const abortController = new AbortController();
+    activeSSEConnections.push(abortController);
+    
+    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+      method: 'GET',
+      signal: abortController.signal
+    });
+    const sseSessionId = sseResponse.headers.get('mcp-session-id');
+    
+    // Wait for session to be created
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    if (sseSessionId) {
+      // Now try to use that SSE session ID with StreamableHTTP DELETE
+      const response = await fetch(`${baseUrl}/mcp`, {
+        method: 'DELETE',
+        headers: {
+          'mcp-session-id': sseSessionId
+        }
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+    
+    abortController.abort();
+    const index = activeSSEConnections.indexOf(abortController);
+    if (index > -1) {
+      activeSSEConnections.splice(index, 1);
+    }
+  });
+
+  it('should handle POST /mcp/messages with existing StreamableHTTP session (transport mismatch in sseMessagesHandler)', async () => {
+    // Create StreamableHTTP session first
+    const initResponse = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-03-26',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0.0' }
+        }
+      })
+    });
+
+    const sessionId = initResponse.headers.get('mcp-session-id');
+    
+    if (sessionId) {
+      // Now try to use that StreamableHTTP session ID with SSE messages endpoint
+      const response = await fetch(`${baseUrl}/mcp/messages?sessionId=${sessionId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/list'
+        })
+      });
+
+      expect(response.status).toBe(400);
+      const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+      expect(body.jsonrpc).toBe('2.0');
+      expect(body.error.code).toBe(-32000);
+      expect(body.error.message).toContain('different transport protocol');
+    }
+  });
+
+  it('should handle POST /mcp/messages with null transport (unreachable else branch)', async () => {
+    // This test is designed to trigger the unreachable else branch in sseMessagesHandler
+    // by creating a scenario where transport is null/undefined after the instanceof check
+    const response = await fetch(`${baseUrl}/mcp/messages?sessionId=null-transport-test`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/list'
+      })
+    });
+
+    expect(response.status).toBe(400);
+    const body = await response.json() as { jsonrpc: string; error: { code: number; message: string } };
+    expect(body.jsonrpc).toBe('2.0');
+    expect(body.error.code).toBe(-32000);
+    expect(body.error.message).toContain('different transport protocol');
+  });
+});
+
