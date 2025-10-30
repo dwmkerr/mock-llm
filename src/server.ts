@@ -9,7 +9,6 @@ import { printConfigSummary } from './config-logger';
 import { setupA2ARoutes } from './a2a/routes';
 import { setupHttpMcpServer } from './mcp/http-server';
 import { streamResponse } from './streaming';
-import { setupMcpSseTransport } from './mcp/sse-transport';
 
 export function createServer(initialConfig: Config, host: string, port: number) {
   //  Track the current config, which can be changed via '/config' endpoints.
@@ -27,7 +26,6 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   // Setup A2A and MCP routes
   setupA2ARoutes(app, host, port);
   setupHttpMcpServer(app, host, port);
-  setupMcpSseTransport(app);
 
   // Catch-all for missing A2A agents
   app.use('/a2a/', (req, res, _next) => {
