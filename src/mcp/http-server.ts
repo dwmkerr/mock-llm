@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import express, { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
-import { ErrorCode, isInitializeRequest, JSONRPCError } from '@modelcontextprotocol/sdk/types.js';
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 
 import { getMCPServer } from './server';
 
