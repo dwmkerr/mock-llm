@@ -11,6 +11,11 @@ export function setupHttpMcpServer(app: express.Express, host: string, port: num
   console.log('Loaded MCP server:');
   console.log(`  - echo-mcp: http://${host}:${port}/mcp`);
   console.log('    - echo: this tool echoes back the provided request');
+  console.log(`  - mcp-sse: http://${host}:${port}/mcp/sse`);
+  console.log('    - init: POST /mcp/sse/init');
+  console.log('    - stream: GET /mcp/sse/stream');
+  console.log('    - send: POST /mcp/sse/send');
+  console.log('    - close: DELETE /mcp/sse');
 
   app.use('/mcp', getMcpRouter());
 }
@@ -18,9 +23,16 @@ export function setupHttpMcpServer(app: express.Express, host: string, port: num
 export function getMcpRouter(): express.Router {
   const router = express.Router();
 
+  // Standard MCP endpoints
   router.post('/', mcpPostHandler);
   router.get('/', mcpGetHandler);
   router.delete('/', mcpDeleteHandler);
+
+  // SSE transport endpoints
+  router.post('/sse/init', sseInitHandler);
+  router.get('/sse/stream', sseStreamHandler);
+  router.post('/sse/send', sseSendHandler);
+  router.delete('/sse', sseCloseHandler);
 
   return router;
 }
@@ -116,3 +128,80 @@ const mcpDeleteHandler = async (req: Request, res: Response) => {
     }
   }
 }
+
+// SSE Transport Handlers
+const sseSessions: { [sessionId: string]: { messages: any[], isActive: boolean } } = {};
+
+const sseInitHandler = async (req: Request, res: Response) => {
+  const sessionId = randomUUID();
+  sseSessions[sessionId] = { messages: [], isActive: true };
+  
+  res.json({ sessionId });
+  console.log(`SSE session initialized: ${sessionId}`);
+};
+
+const sseStreamHandler = async (req: Request, res: Response) => {
+  const sessionId = req.query.sessionId as string;
+  
+  if (!sessionId || !sseSessions[sessionId]) {
+    return res.status(400).json({ error: 'Invalid session ID' });
+  }
+
+  const session = sseSessions[sessionId];
+  
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+
+  // Send replay messages
+  for (const message of session.messages) {
+    res.write(`data: ${JSON.stringify(message)}\n\n`);
+  }
+
+  // Keep connection alive and send new messages as they arrive
+  const keepAlive = setInterval(() => {
+    if (!session.isActive) {
+      clearInterval(keepAlive);
+      res.end();
+      return;
+    }
+    res.write(`data: ${JSON.stringify({ type: 'ping', timestamp: Date.now() })}\n\n`);
+  }, 30000);
+
+  req.on('close', () => {
+    clearInterval(keepAlive);
+    session.isActive = false;
+  });
+};
+
+const sseSendHandler = async (req: Request, res: Response) => {
+  const sessionId = req.body.sessionId;
+  const message = req.body.message;
+  
+  if (!sessionId || !sseSessions[sessionId]) {
+    return res.status(400).json({ error: 'Invalid session ID' });
+  }
+
+  const session = sseSessions[sessionId];
+  session.messages.push({ ...message, timestamp: Date.now() });
+  
+  res.json({ success: true });
+};
+
+const sseCloseHandler = async (req: Request, res: Response) => {
+  const sessionId = req.query.sessionId as string;
+  
+  if (!sessionId || !sseSessions[sessionId]) {
+    return res.status(400).json({ error: 'Invalid session ID' });
+  }
+
+  sseSessions[sessionId].isActive = false;
+  delete sseSessions[sessionId];
+  
+  res.json({ success: true });
+  console.log(`SSE session closed: ${sessionId}`);
+};
