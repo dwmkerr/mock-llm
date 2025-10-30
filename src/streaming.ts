@@ -3,11 +3,11 @@ import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
 import type { StreamingConfig } from './config';
 
 function splitIntoChunks(content: string, chunkSize: number): string[] {
-  const chunks: string[] = [];
-  for (let i = 0; i < content.length; i += chunkSize) {
-    chunks.push(content.slice(i, i + chunkSize));
-  }
-  return chunks.length > 0 ? chunks : [''];
+  const numChunks = Math.ceil(content.length / chunkSize) || 1;
+  return Array.from(
+    { length: numChunks },
+    (_, i) => content.slice(i * chunkSize, (i + 1) * chunkSize)
+  );
 }
 
 function createChunks(
@@ -16,10 +16,6 @@ function createChunks(
   created: number,
   contentChunks: string[]
 ): ChatCompletionChunk[] {
-  if (contentChunks.length === 0) {
-    return [];
-  }
-
   const chunks: ChatCompletionChunk[] = contentChunks.map(content => ({
     id,
     object: 'chat.completion.chunk',
@@ -64,10 +60,10 @@ export function streamResponse(
   res.status(status);
 
   // Extract content and metadata from response
-  const content = responseJson.choices?.[0]?.message?.content || '';
-  const id = responseJson.id || 'chatcmpl-mock';
-  const model = responseJson.model || 'gpt-4';
-  const created = responseJson.created || Math.floor(Date.now() / 1000);
+  const content = responseJson.choices[0].message.content;
+  const id = responseJson.id;
+  const model = responseJson.model;
+  const created = responseJson.created;
 
   // Create chunks from content
   const contentChunks = splitIntoChunks(content, config.chunkSize);
