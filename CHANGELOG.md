@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.17](https://github.com/dwmkerr/mock-llm/compare/v0.1.16...v0.1.17) (2025-10-31)
+
+
+### Features
+
+* add LLM streaming support for testing ([8cb3da4](https://github.com/dwmkerr/mock-llm/commit/8cb3da4fd7ed516ab5e8e04bf2924548160e93f8))
+* add LLM streaming support for testing ([381895e](https://github.com/dwmkerr/mock-llm/commit/381895ee0b4969589373ad5d4abc65bbd0b8447e))
+* **mcp:** add SSE transport with session init/stream/send/close and tests ([987e727](https://github.com/dwmkerr/mock-llm/commit/987e727d9d0c99a7dc2e3614c200624d22b4a2a4))
+* **mcp:** integrate SSE transport into MCP HTTP server ([5b74ef9](https://github.com/dwmkerr/mock-llm/commit/5b74ef98f30a5bb5f30b1844fa05aad7720d8fff))
+* **sse:** add mock SSE provider at /sse/mock with tests; wire into server ([3c72342](https://github.com/dwmkerr/mock-llm/commit/3c72342d2aec702de4142397f1ce8b237e1038c6))
+* **tests:** token usage test ([f729df2](https://github.com/dwmkerr/mock-llm/commit/f729df2fcfdd4e375c66377ca013c19ece15ee37))
+
+
+### Bug Fixes
+
+* enhance test pod security context to address guardrails findings ([a14e898](https://github.com/dwmkerr/mock-llm/commit/a14e89872c552b08f89197c1eefbdb4d481b9868))
+* **mcp:** remove unused imports and obsolete test file ([944760a](https://github.com/dwmkerr/mock-llm/commit/944760a4899dea4ac07ac1f8686a5e5bdb29dbb1))
+* properly close SSE connections in tests to prevent timeout ([b23c084](https://github.com/dwmkerr/mock-llm/commit/b23c0848bdb366f7b934a9a351af43fc1130e087))
+* remove async from afterAll hooks to fix TypeScript errors ([bf67c4a](https://github.com/dwmkerr/mock-llm/commit/bf67c4a99a21559db0136d62cc11a7b88f9d115e))
+* update MCP sample script to parse Streamable HTTP responses ([3d51389](https://github.com/dwmkerr/mock-llm/commit/3d51389f1b8dda640878c34ab8adb6ff83badab9))
+
 ## [0.1.16](https://github.com/dwmkerr/mock-llm/compare/v0.1.15...v0.1.16) (2025-10-27)
 
 
