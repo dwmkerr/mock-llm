@@ -247,4 +247,7 @@ ark:
 
   # MCP Server configuration (optional)
   mcp:
+    # Enable creation of MCPServer resource. Requires Ark CRDs to be installed.
     enabled: true
+    # MCP transport type (http or sse)
+    transport: "sse"

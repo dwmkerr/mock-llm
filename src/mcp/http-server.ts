@@ -12,24 +12,24 @@ export function setupHttpMcpServer(app: express.Express, host: string, port: num
   console.log('Loaded MCP server:');
   console.log(`  - Streamable HTTP (Protocol 2025-03-26): http://${host}:${port}/mcp`);
   console.log('    - Methods: GET, POST, DELETE');
-  console.log(`  - HTTP+SSE (Protocol 2024-11-05): http://${host}:${port}/mcp/sse`);
-  console.log('    - GET /mcp/sse - Establish SSE stream');
-  console.log('    - POST /mcp/messages?sessionId=<id> - Send messages');
-
-  app.use('/mcp', getMcpRouter());
-}
-
-export function getMcpRouter(): express.Router {
-  const router = express.Router();
+  console.log(`  - HTTP+SSE (Protocol 2024-11-05): http://${host}:${port}/sse and http://${host}:${port}/messages`);
+  console.log('    - GET /sse - Establish SSE stream');
+  console.log('    - POST /messages?sessionId=<id> - Send messages');
 
   // Streamable HTTP Transport (Protocol 2025-03-26)
+  app.use('/mcp', getStreamableHTTPRouter());
+
+  // HTTP+SSE Transport (Protocol 2024-11-05)
+  app.get('/sse', sseGetHandler);
+  app.post('/messages', sseMessagesHandler);
+}
+
+export function getStreamableHTTPRouter(): express.Router {
+  const router = express.Router();
+
   router.post('/', mcpPostHandler);
   router.get('/', mcpGetHandler);
   router.delete('/', mcpDeleteHandler);
-
-  // HTTP+SSE Transport (Protocol 2024-11-05)
-  router.get('/sse', sseGetHandler);
-  router.post('/messages', sseMessagesHandler);
 
   return router;
 }

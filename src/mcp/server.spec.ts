@@ -1,9 +1,9 @@
-import { getMcpRouter } from './http-server';
+import { getStreamableHTTPRouter } from './http-server';
 import { getMCPServer } from './server';
 
 describe('MCP Server', () => {
   it('should expose MCP server routes', async () => {
-    const router = getMcpRouter();
+    const router = getStreamableHTTPRouter();
     expect(router).toBeDefined();
 
     expect(router.stack).toEqual(
