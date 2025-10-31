@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.18](https://github.com/dwmkerr/mock-llm/compare/v0.1.17...v0.1.18) (2025-10-31)
+
+
+### Features
+
+* added configurable transport on MCPServer manifest ([60482cc](https://github.com/dwmkerr/mock-llm/commit/60482cc913f8bc6e710ca043a4d7cca05bc3ed35))
+
+
+### Bug Fixes
+
+* sse endpoints, added configurable transport on MCPServer manifest ([a5135b1](https://github.com/dwmkerr/mock-llm/commit/a5135b1b2269e103763e1547ebb86b5c1d60491c))
+
 ## [0.1.17](https://github.com/dwmkerr/mock-llm/compare/v0.1.16...v0.1.17) (2025-10-31)
 
 
