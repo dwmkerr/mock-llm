@@ -1,0 +1,47 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "dwmkerr",
+      "name": "Dave Kerr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1926984?v=4",
+      "profile": "https://github.com/dwmkerr",
+      "contributions": [
+        "code",
+        "doc",
+        "infra",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "lucaromagnoli",
+      "name": "Luca Romagnoli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38782977?v=4",
+      "profile": "https://github.com/lucaromagnoli",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "daniele-marostica",
+      "name": "Daniele",
+      "avatar_url": "https://avatars.githubusercontent.com/u/238710818?v=4",
+      "profile": "https://github.com/daniele-marostica",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "mock-llm",
+  "projectOwner": "dwmkerr"
+}

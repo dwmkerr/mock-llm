@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/@dwmkerr%2Fmock-llm.svg)](https://badge.fury.io/js/@dwmkerr%2Fmock-llm)
 [![codecov](https://codecov.io/gh/dwmkerr/mock-llm/graph/badge.svg?token=0GvcoTYVY4)](https://codecov.io/gh/dwmkerr/mock-llm)
+[![All Contributors](https://img.shields.io/github/all-contributors/dwmkerr/mock-llm?color=ee8449&style=flat-square)](#contributors)
 
 Simple OpenAI compatible Mock API server. Useful for deterministic testing of AI applications.
 
@@ -384,3 +385,27 @@ These can be a reference for your own tests. Each sample is also run as part of 
 | [07-a2a-message-context.sh](samples/07-a2a-message-context.sh) | Test A2A message context and history. |
 | [08-mcp-echo-tool.sh](samples/08-mcp-echo-tool.sh) | Test MCP tool invocation. |
 | [09-token-usage.sh](samples/09-token-usage.sh) | Test token usage tracking. |
+
+## Contributors
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dwmkerr"><img src="https://avatars.githubusercontent.com/u/1926984?v=4?s=100" width="100px;" alt="Dave Kerr"/><br /><sub><b>Dave Kerr</b></sub></a><br /><a href="https://github.com/dwmkerr/mock-llm/commits?author=dwmkerr" title="Code">💻</a> <a href="https://github.com/dwmkerr/mock-llm/commits?author=dwmkerr" title="Documentation">📖</a> <a href="#infra-dwmkerr" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-dwmkerr" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/lucaromagnoli"><img src="https://avatars.githubusercontent.com/u/38782977?v=4?s=100" width="100px;" alt="Luca Romagnoli"/><br /><sub><b>Luca Romagnoli</b></sub></a><br /><a href="https://github.com/dwmkerr/mock-llm/commits?author=lucaromagnoli" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/daniele-marostica"><img src="https://avatars.githubusercontent.com/u/238710818?v=4?s=100" width="100px;" alt="Daniele"/><br /><sub><b>Daniele</b></sub></a><br /><a href="https://github.com/dwmkerr/mock-llm/commits?author=daniele-marostica" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
