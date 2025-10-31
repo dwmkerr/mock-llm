@@ -72,6 +72,18 @@ existingConfigMap: "my-custom-config"
 
 [Ark](https://github.com/mckinsey/agents-at-scale-ark) is an agentic AI platform for Kubernetes. Mock-llm can be used with Ark's Model CRD. This is useful for:
 
+Install with Ark resources enabled:
+
+```bash
+# Requires Ark to be installed: https://github.com/mckinsey/agents-at-scale-ark
+helm install mock-llm oci://ghcr.io/dwmkerr/charts/mock-llm --version 0.1.8 \
+  --set ark.model.enabled=true \
+  --set ark.a2a.enabled=true \
+  --set ark.mcp.enabled=true
+```
+
+This is useful for:
+
 - Deterministic testing
 - Testing error scenarios
 - Understanding values sent to the LLM (e.g. expanded parameters etc)

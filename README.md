@@ -48,6 +48,8 @@ Or use Docker:
 docker run -p 6556:6556 ghcr.io/dwmkerr/mock-llm
 ```
 
+Or [use Helm](#deploying-to-kubernetes-with-helm) for Kubernetes deployments.
+
 Test with curl. The default rule for incoming requests is to reply with the user's exact message:
 
 ```bash
@@ -252,6 +254,13 @@ Mock-LLM exposes A2A servers and tools which support testing the A2A protocol, d
 ```bash
 # Install from OCI registry
 helm install mock-llm oci://ghcr.io/dwmkerr/charts/mock-llm --version 0.1.8
+
+# Install with Ark resources enabled
+# Requires Ark to be installed: https://github.com/mckinsey/agents-at-scale-ark
+helm install mock-llm oci://ghcr.io/dwmkerr/charts/mock-llm --version 0.1.8 \
+  --set ark.model.enabled=true \
+  --set ark.a2a.enabled=true \
+  --set ark.mcp.enabled=true
 
 # Verify deployment
 kubectl get deployment mock-llm
