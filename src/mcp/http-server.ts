@@ -161,8 +161,8 @@ const mcpDeleteHandler = async (req: Request, res: Response) => {
 
 // HTTP+SSE Transport Handlers (Protocol 2024-11-05)
 const sseGetHandler = async (req: Request, res: Response) => {
-  console.log('Received GET request to /mcp/sse (HTTP+SSE transport)');
-  const transport = new SSEServerTransport('/mcp/messages', res);
+  console.log('Received GET request to /sse (HTTP+SSE transport)');
+  const transport = new SSEServerTransport('/messages', res);
   transports[transport.sessionId] = transport;
   
   // Set session ID in headers for client access
