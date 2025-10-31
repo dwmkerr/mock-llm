@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { createServer } from '../server';
 import { getDefaultConfig } from '../config';
 
@@ -188,11 +187,11 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     }, 200);
   });
 
-  it('should establish SSE stream with GET /mcp/sse', async () => {
+  it('should establish SSE stream with GET /sse', async () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const response = await fetch(`${baseUrl}/mcp/sse`, {
+    const response = await fetch(`${baseUrl}/sse`, {
       method: 'GET',
       signal: abortController.signal
     });
@@ -214,8 +213,8 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     }
   });
 
-  it('should return 400 for POST /mcp/messages without session ID', async () => {
-    const response = await fetch(`${baseUrl}/mcp/messages`, {
+  it('should return 400 for POST /messages without session ID', async () => {
+    const response = await fetch(`${baseUrl}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -234,8 +233,8 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     expect(body.error.message).toContain('different transport protocol');
   });
 
-  it('should return 400 for POST /mcp/messages with invalid session ID', async () => {
-    const response = await fetch(`${baseUrl}/mcp/messages?sessionId=invalid-session-id`, {
+  it('should return 400 for POST /messages with invalid session ID', async () => {
+    const response = await fetch(`${baseUrl}/messages?sessionId=invalid-session-id`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -254,9 +253,9 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     expect(body.error.message).toContain('different transport protocol');
   });
 
-  it('should return 400 for POST /mcp/messages when transport not found', async () => {
+  it('should return 400 for POST /messages when transport not found', async () => {
     // Test error path when sessionId is provided but transport doesn't exist
-    const response = await fetch(`${baseUrl}/mcp/messages`, {
+    const response = await fetch(`${baseUrl}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -276,7 +275,7 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -335,7 +334,7 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -388,7 +387,7 @@ describe('MCP HTTP Server - HTTP+SSE Transport', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -454,7 +453,7 @@ describe('MCP HTTP Server - Transport Type Mismatch', () => {
       
       // Establish SSE session first
       sseAbortController = new AbortController();
-      fetch(`${baseUrl}/mcp/sse`, { 
+      fetch(`${baseUrl}/sse`, { 
         method: 'GET',
         signal: sseAbortController.signal 
       }).then(async (sseResponse) => {
@@ -605,7 +604,7 @@ describe('MCP HTTP Server - Error Handling', () => {
     expect(response.status).toBeLessThan(500);
   });
 
-  it('should return 400 when POST /mcp/messages with non-SSE transport', async () => {
+  it('should return 400 when POST /messages with non-SSE transport', async () => {
     // First create a StreamableHTTP session
     const initResponse = await fetch(`${baseUrl}/mcp`, {
       method: 'POST',
@@ -629,7 +628,7 @@ describe('MCP HTTP Server - Error Handling', () => {
     
     if (sessionId) {
       // Now try to use that StreamableHTTP session ID with SSE messages endpoint
-      const response = await fetch(`${baseUrl}/mcp/messages?sessionId=${sessionId}`, {
+      const response = await fetch(`${baseUrl}/messages?sessionId=${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -659,10 +658,10 @@ describe('MCP HTTP Server - Error Handling', () => {
     }
   });
 
-  it('should return 400 when POST /mcp/messages with null transport', async () => {
+  it('should return 400 when POST /messages with null transport', async () => {
     // This test is designed to trigger the "No transport found for sessionId" path
     // by creating a scenario where the transport lookup returns null/undefined
-    const response = await fetch(`${baseUrl}/mcp/messages?sessionId=non-existent-session`, {
+    const response = await fetch(`${baseUrl}/messages?sessionId=non-existent-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -767,7 +766,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -816,7 +815,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -860,7 +859,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -899,7 +898,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     }
   });
 
-  it('should handle POST /mcp/messages with existing StreamableHTTP session (transport mismatch)', async () => {
+  it('should handle POST /messages with existing StreamableHTTP session (transport mismatch)', async () => {
     // First create a StreamableHTTP session
     const initResponse = await fetch(`${baseUrl}/mcp`, {
       method: 'POST',
@@ -923,7 +922,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     
     if (sessionId) {
       // Now try to use that StreamableHTTP session ID with SSE messages endpoint
-      const response = await fetch(`${baseUrl}/mcp/messages?sessionId=${sessionId}`, {
+      const response = await fetch(`${baseUrl}/messages?sessionId=${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -953,9 +952,9 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     }
   });
 
-  it('should handle POST /mcp/messages with non-existent session (null transport)', async () => {
+  it('should handle POST /messages with non-existent session (null transport)', async () => {
     // This test triggers the "No transport found for sessionId" path in sseMessagesHandler
-    const response = await fetch(`${baseUrl}/mcp/messages?sessionId=non-existent-session`, {
+    const response = await fetch(`${baseUrl}/messages?sessionId=non-existent-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -974,12 +973,12 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     expect(body.error.message).toContain('different transport protocol');
   });
 
-  it('should handle POST /mcp/messages with valid SSE session', async () => {
+  it('should handle POST /messages with valid SSE session', async () => {
     // Create SSE session and keep it alive
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -992,7 +991,7 @@ describe('MCP HTTP Server - Additional Coverage Tests', () => {
     
     if (sseSessionId) {
       // Send a message to the SSE session
-      const messagesResponse = await fetch(`${baseUrl}/mcp/messages?sessionId=${sseSessionId}`, {
+      const messagesResponse = await fetch(`${baseUrl}/messages?sessionId=${sseSessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1052,7 +1051,7 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -1105,7 +1104,7 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -1152,7 +1151,7 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -1194,7 +1193,7 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     }
   });
 
-  it('should handle POST /mcp/messages with existing StreamableHTTP session (transport mismatch in sseMessagesHandler)', async () => {
+  it('should handle POST /messages with existing StreamableHTTP session (transport mismatch in sseMessagesHandler)', async () => {
     // Create StreamableHTTP session first
     const initResponse = await fetch(`${baseUrl}/mcp`, {
       method: 'POST',
@@ -1218,7 +1217,7 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     
     if (sessionId) {
       // Now try to use that StreamableHTTP session ID with SSE messages endpoint
-      const response = await fetch(`${baseUrl}/mcp/messages?sessionId=${sessionId}`, {
+      const response = await fetch(`${baseUrl}/messages?sessionId=${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1248,10 +1247,10 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     }
   });
 
-  it('should handle POST /mcp/messages with null transport (unreachable else branch)', async () => {
+  it('should handle POST /messages with null transport (unreachable else branch)', async () => {
     // This test is designed to trigger the unreachable else branch in sseMessagesHandler
     // by creating a scenario where transport is null/undefined after the instanceof check
-    const response = await fetch(`${baseUrl}/mcp/messages?sessionId=null-transport-test`, {
+    const response = await fetch(`${baseUrl}/messages?sessionId=null-transport-test`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -1308,12 +1307,12 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     }
   });
 
-  it('should handle POST /mcp/messages with valid SSE session (cover line 183)', async () => {
+  it('should handle POST /messages with valid SSE session (cover line 183)', async () => {
     // Create SSE session
     const abortController = new AbortController();
     activeSSEConnections.push(abortController);
     
-    const sseResponse = await fetch(`${baseUrl}/mcp/sse`, { 
+    const sseResponse = await fetch(`${baseUrl}/sse`, { 
       method: 'GET',
       signal: abortController.signal
     });
@@ -1323,7 +1322,7 @@ describe('MCP HTTP Server - Patch Coverage Tests', () => {
     
     if (sseSessionId) {
       // Send a message to the SSE session - this should hit line 183 (transport = existingTransport)
-      const messagesResponse = await fetch(`${baseUrl}/mcp/messages?sessionId=${sseSessionId}`, {
+      const messagesResponse = await fetch(`${baseUrl}/messages?sessionId=${sseSessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
