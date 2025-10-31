@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.19](https://github.com/dwmkerr/mock-llm/compare/v0.1.18...v0.1.19) (2025-10-31)
+
+
+### Bug Fixes
+
+* fixed /messages endpoint on sse transport ([ef26e25](https://github.com/dwmkerr/mock-llm/commit/ef26e25e5b2045386726448e24129a07065d58a8))
+* fixed /messages endpoint on sse transport ([299c90f](https://github.com/dwmkerr/mock-llm/commit/299c90fb165a013347f433b19ec11906fa5ecd42))
+
 ## [0.1.18](https://github.com/dwmkerr/mock-llm/compare/v0.1.17...v0.1.18) (2025-10-31)
 
 
