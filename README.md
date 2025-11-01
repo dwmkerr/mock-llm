@@ -28,6 +28,7 @@ The server can be configured to provide different responses based on the input, 
 - [Examples](#examples)
 - [Developer Guide](#developer-guide)
 - [Samples](#samples)
+- [Contributors](#contributors)
 
 <!-- vim-markdown-toc -->
 
@@ -386,9 +387,23 @@ These can be a reference for your own tests. Each sample is also run as part of 
 | [08-mcp-echo-tool.sh](samples/08-mcp-echo-tool.sh) | Test MCP tool invocation. |
 | [09-token-usage.sh](samples/09-token-usage.sh) | Test token usage tracking. |
 
+Each sample below is a link to a real-world deterministic integration test in [Ark](https://github.com/mckinsey/agents-at-scale-ark) that uses `mock-llm` features. These tests can be used as a reference for your own tests.
+
+| Test | Description |
+|------|-------------|
+| [agent-default-model](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/agent-default-model) | Basic LLM query and response. |
+| [model-custom-headers](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/model-custom-headers) | Passing custom headers to models. |
+| [query-parameter-ref](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/query-parameter-ref) | Dynamic prompt resolution from ConfigMaps and Secrets. |
+| [query-token-usage](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/query-token-usage) | Token usage tracking and reporting. |
+| [a2a-agent-discovery](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/a2a-agent-discovery) | A2A agent discovery and server readiness. |
+| [a2a-message-query](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/a2a-message-query) | A2A message handling. |
+| [a2a-blocking-task-completed](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/a2a-blocking-task-completed) | A2A blocking task successful completion. |
+| [a2a-blocking-task-failed](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/a2a-blocking-task-failed) | A2A blocking task error handling. |
+| [mcp-discovery](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/mcp-discovery) | MCP server and tool discovery. |
+
 ## Contributors
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks to ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -408,4 +423,4 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome.
