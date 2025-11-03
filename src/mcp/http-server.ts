@@ -5,16 +5,18 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 
 import { getMCPServer } from './server';
+import { setCurrentRequestHeaders } from './request-context';
 
 const transports: { [sessionId: string]: StreamableHTTPServerTransport | SSEServerTransport } = {};
 
 export function setupHttpMcpServer(app: express.Express, host: string, port: number): void {
+  const mcpInfo = getMCPServer();
+
   console.log('Loaded MCP server:');
-  console.log(`  - Streamable HTTP (Protocol 2025-03-26): http://${host}:${port}/mcp`);
-  console.log('    - Methods: GET, POST, DELETE');
-  console.log(`  - HTTP+SSE (Protocol 2024-11-05): http://${host}:${port}/sse and http://${host}:${port}/messages`);
-  console.log('    - GET /sse - Establish SSE stream');
-  console.log('    - POST /messages?sessionId=<id> - Send messages');
+  console.log(`  - ${mcpInfo.name}: http://${host}:${port}/mcp`);
+  for (const tool of mcpInfo.tools) {
+    console.log(`    - ${tool.name}: ${tool.description}`);
+  }
 
   // Streamable HTTP Transport (Protocol 2025-03-26)
   app.use('/mcp', getStreamableHTTPRouter());
@@ -36,6 +38,9 @@ export function getStreamableHTTPRouter(): express.Router {
 
 const mcpPostHandler = async (req: Request, res: Response) => {
   console.log(`Received ${req.method} request to /mcp`);
+
+  // Store headers for echo_headers tool
+  setCurrentRequestHeaders(req.headers as Record<string, string>);
 
   try {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
@@ -73,8 +78,8 @@ const mcpPostHandler = async (req: Request, res: Response) => {
         }
       };
 
-      const mcpServer = getMCPServer();
-      await mcpServer.connect(transport);
+      const mcpServerInfo = getMCPServer();
+      await mcpServerInfo.server.connect(transport);
     } else {
       res.status(400).json({
         jsonrpc: '2.0',
@@ -172,11 +177,14 @@ const sseGetHandler = async (req: Request, res: Response) => {
     delete transports[transport.sessionId];
   });
 
-  const server = getMCPServer();
-  await server.connect(transport);
+  const serverInfo = getMCPServer();
+  await serverInfo.server.connect(transport);
 };
 
 const sseMessagesHandler = async (req: Request, res: Response) => {
+  // Store headers for echo_headers tool
+  setCurrentRequestHeaders(req.headers as Record<string, string>);
+
   const sessionId = req.query.sessionId as string;
   let transport: SSEServerTransport;
 

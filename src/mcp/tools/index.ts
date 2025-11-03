@@ -1,13 +1,19 @@
 import { z } from 'zod'
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { currentRequestHeaders } from '../request-context';
 
-export function configureTools(server: McpServer): void {
-  console.log('Configuring MCP tools:');
+export interface ToolInfo {
+  name: string;
+  description: string;
+}
+
+export function configureTools(server: McpServer): ToolInfo[] {
+  const tools: ToolInfo[] = [];
 
   server.tool(
     'echo',
-    'this tool echoes back the provided request',
+    'echoes back the provided request',
     {
       text: z.string().describe('the text to echo back'),
     },
@@ -22,4 +28,24 @@ export function configureTools(server: McpServer): void {
       }
     }
   );
+  tools.push({ name: 'echo', description: 'echoes back the provided request' });
+
+  server.tool(
+    'echo_headers',
+    'returns HTTP headers as JSON',
+    {},
+    async (): Promise<CallToolResult> => {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(currentRequestHeaders)
+          }
+        ]
+      }
+    }
+  );
+  tools.push({ name: 'echo_headers', description: 'returns HTTP headers as JSON' });
+
+  return tools;
 }

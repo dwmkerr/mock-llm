@@ -22,6 +22,10 @@ mock-llm
 
 The echo tool accepts text input and returns it unchanged, useful for testing basic MCP connectivity and tool invocation.
 
+### Echo Headers Tool
+
+The echo_headers tool returns HTTP headers received with the request as JSON, useful for testing header propagation.
+
 ### Testing with curl
 
 The MCP server uses Streamable HTTP transport, which returns responses in event stream format.
@@ -100,6 +104,27 @@ Response:
 ```
 event: message
 data: {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"Hello, MCP!"}]}}
+```
+
+Test header propagation with echo_headers:
+
+```bash
+# Remove 'data: ' prefix to get raw JSON response
+curl -N -X POST http://localhost:6556/mcp/ \
+  -H "mcp-session-id: YOUR-SESSION-ID" \
+  -H "Authorization: Bearer test-123" \
+  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"echo_headers","arguments":{}},"id":4}' \
+  | sed -n 's/^data: //p' | head -1 | jq '.result.content[0].text | fromjson'
+```
+
+Response shows received headers:
+
+```json
+{
+  "authorization": "Bearer test-123",
+  "content-type": "application/json",
+  ...
+}
 ```
 
 Terminate the session:
