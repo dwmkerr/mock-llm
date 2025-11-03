@@ -19,8 +19,14 @@ describe('MCP Server', () => {
   });
 
   it('should create MCP server instance', () => {
-    const server = getMCPServer();
-    expect(server).toBeDefined();
-    expect(server.constructor.name).toBe('McpServer');
+    const serverInfo = getMCPServer();
+    expect(serverInfo).toMatchObject({
+      name: 'echo-mcp',
+      tools: expect.arrayContaining([
+        expect.objectContaining({ name: 'echo' }),
+        expect.objectContaining({ name: 'echo_headers' }),
+      ]),
+    });
+    expect(serverInfo.server.constructor.name).toBe('McpServer');
   });
 });

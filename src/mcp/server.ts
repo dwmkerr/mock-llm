@@ -1,8 +1,14 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import { configureTools } from './tools';
+import { configureTools, ToolInfo } from './tools';
 
-export function getMCPServer(): McpServer {
+export interface MCPServerInfo {
+  server: McpServer;
+  name: string;
+  tools: ToolInfo[];
+}
+
+export function getMCPServer(): MCPServerInfo {
   const server = new McpServer({
     name: "echo-mcp",
     version: "1.0.0",
@@ -12,8 +18,8 @@ export function getMCPServer(): McpServer {
     },
   });
 
-  configureTools(server);
+  const tools = configureTools(server);
 
-  return server;
+  return { server, name: "echo-mcp", tools };
 }
 
