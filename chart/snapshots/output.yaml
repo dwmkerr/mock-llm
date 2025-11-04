@@ -5,10 +5,8 @@ kind: ServiceAccount
 metadata:
   name: test-chart-mock-llm
   labels:
-    helm.sh/chart: mock-llm-0.1.19
     app.kubernetes.io/name: mock-llm
     app.kubernetes.io/instance: test-chart
-    app.kubernetes.io/version: "0.1.19"
     app.kubernetes.io/managed-by: Helm
 automountServiceAccountToken: false
 ---
@@ -18,10 +16,8 @@ kind: Service
 metadata:
   name: test-chart-mock-llm
   labels:
-    helm.sh/chart: mock-llm-0.1.19
     app.kubernetes.io/name: mock-llm
     app.kubernetes.io/instance: test-chart
-    app.kubernetes.io/version: "0.1.19"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -40,10 +36,8 @@ kind: Deployment
 metadata:
   name: test-chart-mock-llm
   labels:
-    helm.sh/chart: mock-llm-0.1.19
     app.kubernetes.io/name: mock-llm
     app.kubernetes.io/instance: test-chart
-    app.kubernetes.io/version: "0.1.19"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -54,10 +48,8 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: mock-llm-0.1.19
         app.kubernetes.io/name: mock-llm
         app.kubernetes.io/instance: test-chart
-        app.kubernetes.io/version: "0.1.19"
         app.kubernetes.io/managed-by: Helm
     spec:
       serviceAccountName: test-chart-mock-llm
@@ -73,7 +65,6 @@ spec:
               drop:
               - ALL
             readOnlyRootFilesystem: true
-          image: "ghcr.io/dwmkerr/mock-llm:0.1.19"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -116,10 +107,8 @@ kind: MCPServer
 metadata:
   name: test-chart-mock-llm-mcp
   labels:
-    helm.sh/chart: mock-llm-0.1.19
     app.kubernetes.io/name: mock-llm
     app.kubernetes.io/instance: test-chart
-    app.kubernetes.io/version: "0.1.19"
     app.kubernetes.io/managed-by: Helm
 spec:
   description: Mock MCP Server
@@ -137,10 +126,8 @@ kind: Tool
 metadata:
   name: test-chart-mock-llm-echo-tool
   labels:
-    helm.sh/chart: mock-llm-0.1.19
     app.kubernetes.io/name: mock-llm
     app.kubernetes.io/instance: test-chart
-    app.kubernetes.io/version: "0.1.19"
     app.kubernetes.io/managed-by: Helm
 spec:
   description: Echo tool for MCP server that returns the input as output
@@ -161,10 +148,8 @@ kind: Pod
 metadata:
   name: "test-chart-mock-llm-test-connection"
   labels:
-    helm.sh/chart: mock-llm-0.1.19
     app.kubernetes.io/name: mock-llm
     app.kubernetes.io/instance: test-chart
-    app.kubernetes.io/version: "0.1.19"
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test
