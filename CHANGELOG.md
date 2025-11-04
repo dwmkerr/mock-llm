@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.21](https://github.com/dwmkerr/mock-llm/compare/v0.1.20...v0.1.21) (2025-11-04)
+
+
+### Bug Fixes
+
+* filter version lines from helm chart snapshot test ([cfbb19a](https://github.com/dwmkerr/mock-llm/commit/cfbb19a41fbfee32342e264e08a8eac5e91efb54))
+* filter version lines from helm chart snapshot test ([f2e715d](https://github.com/dwmkerr/mock-llm/commit/f2e715d19174c19e18b00f8c495441193520d897))
+
 ## [0.1.20](https://github.com/dwmkerr/mock-llm/compare/v0.1.19...v0.1.20) (2025-11-03)
 
 
