@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.20](https://github.com/dwmkerr/mock-llm/compare/v0.1.19...v0.1.20) (2025-11-03)
+
+
+### Features
+
+* add echo_headers MCP tool for testing header propagation ([4f83c93](https://github.com/dwmkerr/mock-llm/commit/4f83c931b019cb332e5c811a457f432a43044d45))
+* add echo_headers MCP tool for testing header propagation ([f4518a7](https://github.com/dwmkerr/mock-llm/commit/f4518a7dfea3df156fc02ae376e83c08befcf962)), closes [#57](https://github.com/dwmkerr/mock-llm/issues/57)
+
+
+### Bug Fixes
+
+* update MCP server test to match new MCPServerInfo structure ([8a1b095](https://github.com/dwmkerr/mock-llm/commit/8a1b095b420f26d6ca7a16d33b800f90bda8210c))
+
 ## [0.1.19](https://github.com/dwmkerr/mock-llm/compare/v0.1.18...v0.1.19) (2025-10-31)
 
 

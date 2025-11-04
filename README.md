@@ -386,6 +386,7 @@ These can be a reference for your own tests. Each sample is also run as part of 
 | [07-a2a-message-context.sh](samples/07-a2a-message-context.sh) | Test A2A message context and history. |
 | [08-mcp-echo-tool.sh](samples/08-mcp-echo-tool.sh) | Test MCP tool invocation. |
 | [09-token-usage.sh](samples/09-token-usage.sh) | Test token usage tracking. |
+| [10-mcp-inspect-headers.sh](samples/10-mcp-inspect-headers.sh) | Test MCP header inspection. |
 
 Each sample below is a link to a real-world deterministic integration test in [Ark](https://github.com/mckinsey/agents-at-scale-ark) that uses `mock-llm` features. These tests can be used as a reference for your own tests.
 
@@ -400,6 +401,7 @@ Each sample below is a link to a real-world deterministic integration test in [A
 | [a2a-blocking-task-completed](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/a2a-blocking-task-completed) | A2A blocking task successful completion. |
 | [a2a-blocking-task-failed](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/a2a-blocking-task-failed) | A2A blocking task error handling. |
 | [mcp-discovery](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/mcp-discovery) | MCP server and tool discovery. |
+| [mcp-header-propagation (PR #311)](https://github.com/mckinsey/agents-at-scale-ark/pull/311) | MCP header propagation from Agents and Queries. |
 
 ## Contributors
 
