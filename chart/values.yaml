@@ -232,6 +232,12 @@ ark:
     #         name: my-config
     #         key: value
     headers: []
+    # Additional custom labels to add to the Model resource
+    # Example:
+    # labels:
+    #   environment: production
+    #   team: platform
+    labels: {}
 
   # A2A Agent configuration (optional)
   # Creates A2AServer CRDs for the echo and countdown agents
@@ -248,3 +254,9 @@ ark:
   # MCP Server configuration (optional)
   mcp:
     enabled: false
+    # Additional custom labels to add to the MCPServer resource
+    # Example:
+    # labels:
+    #   environment: production
+    #   team: platform
+    labels: {}
