@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.22](https://github.com/dwmkerr/mock-llm/compare/v0.1.21...v0.1.22) (2025-11-05)
+
+
+### Features
+
+* chart - pass custom labels to created custom resources ([21b8cce](https://github.com/dwmkerr/mock-llm/commit/21b8cce8fc8a4a4e4a8a78216ed87a4bd1fa3364))
+* chart - pass custom labels to created custom resources ([215101d](https://github.com/dwmkerr/mock-llm/commit/215101d1677abc6505b80df55d56bc63ef5ceca5))
+
 ## [0.1.21](https://github.com/dwmkerr/mock-llm/compare/v0.1.20...v0.1.21) (2025-11-04)
 
 
