@@ -53,6 +53,7 @@ spec:
         app.kubernetes.io/managed-by: Helm
     spec:
       serviceAccountName: test-chart-mock-llm
+      terminationGracePeriodSeconds: 30
       securityContext:
         fsGroup: 1000
         runAsNonRoot: true

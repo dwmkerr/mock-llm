@@ -43,6 +43,9 @@ podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
 
+terminationGracePeriodSeconds: 30
+
+
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
