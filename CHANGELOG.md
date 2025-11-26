@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.23](https://github.com/dwmkerr/mock-llm/compare/v0.1.22...v0.1.23) (2025-11-26)
+
+
+### Features
+
+* add termination grace period configuration ([0ac9bc9](https://github.com/dwmkerr/mock-llm/commit/0ac9bc9568f6f752ff58dd2d281445852d7fb737))
+* add termination grace period configuration ([af60286](https://github.com/dwmkerr/mock-llm/commit/af6028695c5294cf1bc07e81ae564b03e1d2de46))
+
 ## [0.1.22](https://github.com/dwmkerr/mock-llm/compare/v0.1.21...v0.1.22) (2025-11-05)
 
 
