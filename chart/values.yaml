@@ -43,6 +43,10 @@ podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
 
+# This is for setting the termination grace period in seconds for a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
+terminationGracePeriodSeconds: 30
+
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
