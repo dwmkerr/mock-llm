@@ -384,6 +384,205 @@ describe('server jmes helper', () => {
   });
 });
 
+describe('server sequence matching', () => {
+  const app = createServer(getDefaultConfig(), 'localhost', 6556);
+  let server: ReturnType<typeof app.listen>;
+  let baseUrl: string;
+
+  beforeAll((done) => {
+    server = app.listen(0, () => {
+      const address = server.address() as { port: number };
+      baseUrl = `http://localhost:${address.port}`;
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  beforeEach(async () => {
+    // Reset config and sequence counters before each test
+    await fetch(`${baseUrl}/config`, { method: 'DELETE' });
+  });
+
+  it('should return different responses based on sequence number', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          sequence: 0,
+          response: { status: 200, content: '{"response":"first"}' }
+        },
+        {
+          path: '/v1/chat/completions',
+          sequence: 1,
+          response: { status: 200, content: '{"response":"second"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response1 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+    expect(await response1.json()).toEqual({ response: 'first' });
+
+    const response2 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+    expect(await response2.json()).toEqual({ response: 'second' });
+  });
+
+  it('should reset sequence counter on DELETE /config', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          sequence: 0,
+          response: { status: 200, content: '{"response":"first"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    await fetch(`${baseUrl}/config`, { method: 'DELETE' });
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+    expect(await response.json()).toEqual({ response: 'first' });
+  });
+
+  it('should allow rules without sequence to match any request', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          response: { status: 200, content: '{"response":"fallback"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    for (let i = 0; i < 3; i++) {
+      const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'gpt-4', messages: [] })
+      });
+      expect(await response.json()).toEqual({ response: 'fallback' });
+    }
+  });
+
+  it('should combine sequence with match expression', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          match: "contains(body.messages[-1].content, 'weather')",
+          sequence: 0,
+          response: { status: 200, content: '{"response":"weather-first"}' }
+        },
+        {
+          path: '/v1/chat/completions',
+          match: "contains(body.messages[-1].content, 'weather')",
+          sequence: 1,
+          response: { status: 200, content: '{"response":"weather-second"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response1 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: 'weather in NYC' }] })
+    });
+    expect(await response1.json()).toEqual({ response: 'weather-first' });
+
+    const response2 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: 'weather in LA' }] })
+    });
+    expect(await response2.json()).toEqual({ response: 'weather-second' });
+  });
+
+  it('should return error when no sequence matches', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          sequence: 0,
+          response: { status: 200, content: '{"response":"first"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    // First request matches
+    await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    // Second request has no matching sequence
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [] })
+    });
+
+    expect(response.status).toBe(500);
+    const json = await response.json() as { message: string };
+    expect(json.message).toContain('No matching rule found for request (sequence: 1)');
+  });
+});
+
 describe('server match expressions', () => {
   const app = createServer(getDefaultConfig(), 'localhost', 6556);
   let server: ReturnType<typeof app.listen>;

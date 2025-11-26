@@ -9,7 +9,8 @@ export interface Response {
 
 export interface Rule {
   path: string;
-  match: string;
+  match?: string;
+  sequence?: number;
   response: Response;
 }
 
