@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.24](https://github.com/dwmkerr/mock-llm/compare/v0.1.23...v0.1.24) (2025-11-26)
+
+
+### Features
+
+* add sequential response matching ([8296fcb](https://github.com/dwmkerr/mock-llm/commit/8296fcb548447cc696320e54d3013b4c402ff0ed))
+* add sequential response matching ([925e935](https://github.com/dwmkerr/mock-llm/commit/925e9353afe800519b51144ca68e9f5513a5acae))
+
 ## [0.1.23](https://github.com/dwmkerr/mock-llm/compare/v0.1.22...v0.1.23) (2025-11-26)
 
 
