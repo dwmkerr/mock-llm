@@ -21,6 +21,7 @@ The server can be configured to provide different responses based on the input, 
     - [Updating Configuration](#updating-configuration)
     - [Health & Readiness Checks](#health--readiness-checks)
     - [Template Variables](#template-variables)
+    - [Sequential Responses](#sequential-responses)
     - [Streaming Configuration](#streaming-configuration)
 - [MCP (Model Context Protocol) Mocking](#mcp-model-context-protocol-mocking)
 - [A2A (Agent to Agent Protocol) Mocking](#a2a-agent-to-agent-protocol-mocking)
@@ -212,6 +213,38 @@ Objects and arrays are automatically JSON-stringified. Primitives are returned a
 "apikey": "{{jmes request query.apikey}}"           // "test-123"
 ```
 
+### Sequential Responses
+
+For testing multi-turn interactions like tool calling, use `sequence` to return different responses based on request order:
+
+```yaml
+rules:
+  # First request: trigger tool call
+  - path: "/v1/chat/completions"
+    sequence: 0
+    response:
+      status: 200
+      content: '{"choices":[{"message":{"tool_calls":[{"function":{"name":"get_weather"}}]},"finish_reason":"tool_calls"}]}'
+
+  # Second request: return final answer
+  - path: "/v1/chat/completions"
+    sequence: 1
+    response:
+      status: 200
+      content: '{"choices":[{"message":{"content":"The weather is 72°F"},"finish_reason":"stop"}]}'
+```
+
+Rules can use `match`, `sequence`, both, or neither:
+
+| `match` | `sequence` | Behavior |
+|---------|------------|----------|
+| No | No | Matches all requests (catch-all) |
+| Yes | No | Content-based matching only |
+| No | Yes | Order-based matching only |
+| Yes | Yes | Must satisfy both conditions |
+
+Sequence counters are tracked per path and reset via `DELETE /config`.
+
 ### Streaming Configuration
 
 Mock-LLM supports streaming responses when clients send `stream: true` in their requests. Streaming behavior is configured globally:
@@ -387,6 +420,7 @@ These can be a reference for your own tests. Each sample is also run as part of 
 | [08-mcp-echo-tool.sh](samples/08-mcp-echo-tool.sh) | Test MCP tool invocation. |
 | [09-token-usage.sh](samples/09-token-usage.sh) | Test token usage tracking. |
 | [10-mcp-inspect-headers.sh](samples/10-mcp-inspect-headers.sh) | Test MCP header inspection. |
+| [11-sequential-tool-calling.sh](samples/11-sequential-tool-calling.sh) | Test sequential responses for tool-calling flows. |
 
 Each sample below is a link to a real-world deterministic integration test in [Ark](https://github.com/mckinsey/agents-at-scale-ark) that uses `mock-llm` features. These tests can be used as a reference for your own tests.
 
@@ -402,6 +436,7 @@ Each sample below is a link to a real-world deterministic integration test in [A
 | [a2a-blocking-task-failed](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/a2a-blocking-task-failed) | A2A blocking task error handling. |
 | [mcp-discovery](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/mcp-discovery) | MCP server and tool discovery. |
 | [mcp-header-propagation (PR #311)](https://github.com/mckinsey/agents-at-scale-ark/pull/311) | MCP header propagation from Agents and Queries. |
+| [agent-tools](https://github.com/mckinsey/agents-at-scale-ark/tree/main/tests/agent-tools) | Sequential responses for tool-calling agents. |
 
 ## Contributors
 

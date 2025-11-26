@@ -14,6 +14,9 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   //  Track the current config, which can be changed via '/config' endpoints.
   let currentConfig = { ...initialConfig };
 
+  //  Track request sequence counters per path for sequential matching.
+  const sequenceCounters: Record<string, number> = {};
+
   //  Create the app, log requests.
   const app = express();
   app.use(express.json());
@@ -70,6 +73,8 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   });
   app.delete('/config', (req, res) => {
     currentConfig = { ...initialConfig };
+    // Reset sequence counters when config is reset
+    Object.keys(sequenceCounters).forEach(key => delete sequenceCounters[key]);
     printConfigSummary(currentConfig, 'config reset');
     res.json(currentConfig);
   });
@@ -78,6 +83,10 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   app.post(/.*/, (req, res) => {
     const requestBody: ChatCompletionCreateParamsBase = req.body;
     const isStreaming = requestBody.stream === true;
+
+    //  Get and increment the sequence counter for this path.
+    const currentSequence = sequenceCounters[req.path] || 0;
+    sequenceCounters[req.path] = currentSequence + 1;
 
     //  Filter rules by path (typically 'v1/completions').
     //  If no rules for this path we fail.
@@ -97,12 +106,21 @@ export function createServer(initialConfig: Config, host: string, port: number) 
       query: req.query
     };
 
-    //  Find all rules that match the JMESPath expression. If no rules match
-    //  then we fail.
+    //  Find all rules that match sequence and JMESPath expression.
+    //  Rules with sequence must match the current request number.
+    //  Rules without sequence match any request number.
+    //  If no rules match then we fail.
     const matchingRules: Rule[] = [];
     for (const rule of matchingPathRules) {
+      // Check sequence match (if specified)
+      if (rule.sequence !== undefined && rule.sequence !== currentSequence) {
+        continue;
+      }
+
+      // Check JMESPath match (default to '@' which always matches)
       try {
-        const result = jmespath.search(request, rule.match);
+        const matchExpression = rule.match || '@';
+        const result = jmespath.search(request, matchExpression);
         if (result) {
           matchingRules.push(rule);
         }
@@ -111,7 +129,7 @@ export function createServer(initialConfig: Config, host: string, port: number) 
       }
     }
     if (matchingRules.length === 0) {
-      throw new Error('No matching rule found for request');
+      throw new Error(`No matching rule found for request (sequence: ${currentSequence})`);
     }
 
     //  Render the response, expanding any expressions from the matched rule.
