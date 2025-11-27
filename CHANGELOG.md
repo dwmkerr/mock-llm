@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.25](https://github.com/dwmkerr/mock-llm/compare/v0.1.24...v0.1.25) (2025-11-27)
+
+
+### Bug Fixes
+
+* checkout release tag in publish jobs to prevent version mismatch ([730eb85](https://github.com/dwmkerr/mock-llm/commit/730eb85c741475aa1b1bdbd06bbc35f5ba8e478b))
+
 ## [0.1.24](https://github.com/dwmkerr/mock-llm/compare/v0.1.23...v0.1.24) (2025-11-26)
 
 
