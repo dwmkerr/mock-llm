@@ -243,7 +243,7 @@ Rules can use `match`, `sequence`, both, or neither:
 | No | Yes | Order-based matching only |
 | Yes | Yes | Must satisfy both conditions |
 
-Sequence counters are tracked per path and reset via `DELETE /config`.
+Sequence counters are tracked per path and reset via `DELETE /config`. The counter only increments when the winning rule has a `sequence` property, so fallback rules (without `sequence`) can handle liveness probes without consuming sequence numbers.
 
 ### Streaming Configuration
 

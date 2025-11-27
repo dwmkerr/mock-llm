@@ -84,9 +84,8 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     const requestBody: ChatCompletionCreateParamsBase = req.body;
     const isStreaming = requestBody.stream === true;
 
-    //  Get and increment the sequence counter for this path.
+    //  Get the current sequence counter for this path.
     const currentSequence = sequenceCounters[req.path] || 0;
-    sequenceCounters[req.path] = currentSequence + 1;
 
     //  Filter rules by path (typically 'v1/completions').
     //  If no rules for this path we fail.
@@ -133,7 +132,13 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     }
 
     //  Render the response, expanding any expressions from the matched rule.
+    //  Only increment the sequence counter if the winning rule has a sequence.
+    //  This allows fallback rules (without sequence) to handle requests like model
+    //  liveness probes without consuming sequence numbers meant for actual calls.
     const matchedRule = matchingRules[matchingRules.length - 1];
+    if (matchedRule.sequence !== undefined) {
+      sequenceCounters[req.path] = currentSequence + 1;
+    }
     const body = renderTemplate(matchedRule.response.content, { request });
     const parsed = JSON.parse(body);
 
