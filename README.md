@@ -398,6 +398,25 @@ Test and inspect the MCP Server running locally:
 npm run local:inspect
 ```
 
+### Testing with Minikube
+
+```bash
+docker build -t mock-llm:local .
+minikube image load mock-llm:local
+helm install mock-llm ./chart \
+  --set image.repository=mock-llm \
+  --set image.tag=local \
+  --set image.pullPolicy=Never
+```
+
+To use with chainsaw tests (e.g., from [Ark](https://github.com/mckinsey/agents-at-scale-ark)):
+
+```bash
+minikube image load mock-llm:local
+chainsaw test ./tests/my-test \
+  --values image.repository=mock-llm,image.tag=local,image.pullPolicy=Never
+```
+
 ## Samples
 
 Each sample below is in the form of an extremely minimal script that shows:
