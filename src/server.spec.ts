@@ -581,6 +581,82 @@ describe('server sequence matching', () => {
     const json = await response.json() as { message: string };
     expect(json.message).toContain('No matching rule found for request (sequence: 1)');
   });
+
+  it('should not increment sequence counter for fallback rules (model liveness probes)', async () => {
+    // This test verifies that fallback rules (without sequence) do not consume
+    // sequence numbers. This is important for model liveness probes which hit
+    // the same endpoint but should not affect the sequence for actual requests.
+    //
+    // Scenario: Sequence rules have specific match patterns (like agent system prompts),
+    // fallback has no match. Probes don't match sequence rules, so only fallback handles them.
+    const config = {
+      rules: [
+        // Fallback rule first (no sequence, no match) - handles probes and unmatched requests
+        {
+          path: '/v1/chat/completions',
+          response: { status: 200, content: '{"response":"fallback"}' }
+        },
+        // Sequence rules with specific match patterns (like agent system prompts)
+        {
+          path: '/v1/chat/completions',
+          match: "contains(body.messages[0].content || '', 'agent-a')",
+          sequence: 0,
+          response: { status: 200, content: '{"response":"first"}' }
+        },
+        {
+          path: '/v1/chat/completions',
+          match: "contains(body.messages[0].content || '', 'agent-b')",
+          sequence: 1,
+          response: { status: 200, content: '{"response":"second"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    // Simulate liveness probes (no agent identifier) - should hit fallback, NOT consume sequences
+    const probe1 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'system', content: 'You are a helpful assistant' }] })
+    });
+    expect(await probe1.json()).toEqual({ response: 'fallback' });
+
+    const probe2 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: 'ping' }] })
+    });
+    expect(await probe2.json()).toEqual({ response: 'fallback' });
+
+    // Now make actual agent calls - sequence should still be at 0
+    const response1 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'system', content: 'You are agent-a' }] })
+    });
+    expect(await response1.json()).toEqual({ response: 'first' });
+
+    // Another probe after sequence 0 was consumed - should still NOT consume sequences
+    const probe3 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: 'health check' }] })
+    });
+    expect(await probe3.json()).toEqual({ response: 'fallback' });
+
+    // Sequence should still be at 1
+    const response2 = await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'system', content: 'You are agent-b' }] })
+    });
+    expect(await response2.json()).toEqual({ response: 'second' });
+  });
 });
 
 describe('server match expressions', () => {
