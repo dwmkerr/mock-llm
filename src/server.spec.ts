@@ -35,6 +35,26 @@ describe('server config API', () => {
     expect(await response.json()).toEqual({ status: 'ready' });
   });
 
+  it('should GET /requests to return recorded requests', async () => {
+    // Make a request that will be recorded
+    await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: 'test' }] })
+    });
+
+    const response = await fetch(`${baseUrl}/requests`);
+    expect(response.status).toBe(200);
+
+    const requests = await response.json() as Array<{ method: string; path: string; body: unknown }>;
+    expect(requests.length).toBeGreaterThan(0);
+
+    const lastRequest = requests[requests.length - 1];
+    expect(lastRequest.method).toBe('POST');
+    expect(lastRequest.path).toBe('/v1/chat/completions');
+    expect(lastRequest.body).toHaveProperty('model', 'gpt-4');
+  });
+
   it('should GET current config as JSON by default', async () => {
     const response = await fetch(`${baseUrl}/config`);
 
@@ -656,6 +676,35 @@ describe('server sequence matching', () => {
       body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'system', content: 'You are agent-b' }] })
     });
     expect(await response2.json()).toEqual({ response: 'second' });
+  });
+
+  it('should not increment sequence counter when sequenceIgnore is true', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          sequence: 0,
+          sequenceIgnore: true,
+          response: { status: 200, content: '{"response":"always-zero"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    // Multiple requests all match sequence 0 since counter never increments
+    for (let i = 0; i < 3; i++) {
+      const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'gpt-4', messages: [] })
+      });
+      expect(await response.json()).toEqual({ response: 'always-zero' });
+    }
   });
 });
 

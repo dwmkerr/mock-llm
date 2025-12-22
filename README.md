@@ -192,6 +192,15 @@ curl http://localhost:6556/ready
 # {"status":"ready"}
 ```
 
+### Debugging Requests
+
+`GET /requests` returns all recorded requests for debugging:
+
+```bash
+curl http://localhost:6556/requests
+# [{"timestamp":"...","method":"POST","path":"/v1/chat/completions","body":{...}}]
+```
+
 ### Template Variables
 
 Available in response content templates:
@@ -232,6 +241,15 @@ rules:
     response:
       status: 200
       content: '{"choices":[{"message":{"content":"The weather is 72°F"},"finish_reason":"stop"}]}'
+
+  # Catch-all for any other matches - won't increment sequence counter. This
+  # can be useful for things like liveness probe checks that should not
+  # be matched by the sequence rules.
+  - path: "/v1/chat/completions"
+    sequenceIgnore: true
+    response:
+      status: 200
+      content: '{"choices":[{"message":{"content":"OK"}}]}'
 ```
 
 Rules can use `match`, `sequence`, both, or neither:
@@ -243,7 +261,7 @@ Rules can use `match`, `sequence`, both, or neither:
 | No | Yes | Order-based matching only |
 | Yes | Yes | Must satisfy both conditions |
 
-Sequence counters are tracked per path and reset via `DELETE /config`. The counter only increments when the winning rule has a `sequence` property, so fallback rules (without `sequence`) can handle liveness probes without consuming sequence numbers.
+Sequence counters are tracked per path and reset via `DELETE /config`. The counter only increments when the winning rule has a `sequence` property. Use `sequenceIgnore: true` on rules that should not increment the sequence counter.
 
 ### Streaming Configuration
 

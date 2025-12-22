@@ -17,6 +17,9 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   //  Track request sequence counters per path for sequential matching.
   const sequenceCounters: Record<string, number> = {};
 
+  //  Track all requests for debugging.
+  const requests: Array<{ timestamp: string; method: string; path: string; body: unknown }> = [];
+
   //  Create the app, log requests.
   const app = express();
   app.use(express.json());
@@ -79,10 +82,23 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     res.json(currentConfig);
   });
 
+  //  Return all recorded requests for debugging.
+  app.get('/requests', (_, res) => {
+    res.json(requests);
+  });
+
   //  Handle chat completion requests.
   app.post(/.*/, (req, res) => {
     const requestBody: ChatCompletionCreateParamsBase = req.body;
     const isStreaming = requestBody.stream === true;
+
+    //  Record the request for debugging.
+    requests.push({
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      body: requestBody
+    });
 
     //  Get the current sequence counter for this path.
     const currentSequence = sequenceCounters[req.path] || 0;
@@ -136,7 +152,7 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     //  This allows fallback rules (without sequence) to handle requests like model
     //  liveness probes without consuming sequence numbers meant for actual calls.
     const matchedRule = matchingRules[matchingRules.length - 1];
-    if (matchedRule.sequence !== undefined) {
+    if (matchedRule.sequence !== undefined && !matchedRule.sequenceIgnore) {
       sequenceCounters[req.path] = currentSequence + 1;
     }
     const body = renderTemplate(matchedRule.response.content, { request });
