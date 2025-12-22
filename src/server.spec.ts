@@ -35,6 +35,26 @@ describe('server config API', () => {
     expect(await response.json()).toEqual({ status: 'ready' });
   });
 
+  it('should GET /requests to return recorded requests', async () => {
+    // Make a request that will be recorded
+    await fetch(`${baseUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: 'test' }] })
+    });
+
+    const response = await fetch(`${baseUrl}/requests`);
+    expect(response.status).toBe(200);
+
+    const requests = await response.json() as Array<{ method: string; path: string; body: unknown }>;
+    expect(requests.length).toBeGreaterThan(0);
+
+    const lastRequest = requests[requests.length - 1];
+    expect(lastRequest.method).toBe('POST');
+    expect(lastRequest.path).toBe('/v1/chat/completions');
+    expect(lastRequest.body).toHaveProperty('model', 'gpt-4');
+  });
+
   it('should GET current config as JSON by default', async () => {
     const response = await fetch(`${baseUrl}/config`);
 

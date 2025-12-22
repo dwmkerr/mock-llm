@@ -11,6 +11,7 @@ export interface Rule {
   path: string;
   match?: string;
   sequence?: number;
+  sequenceIgnore?: boolean;
   response: Response;
 }
 
