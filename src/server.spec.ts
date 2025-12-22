@@ -677,6 +677,35 @@ describe('server sequence matching', () => {
     });
     expect(await response2.json()).toEqual({ response: 'second' });
   });
+
+  it('should not increment sequence counter when sequenceIgnore is true', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/v1/chat/completions',
+          sequence: 0,
+          sequenceIgnore: true,
+          response: { status: 200, content: '{"response":"always-zero"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    // Multiple requests all match sequence 0 since counter never increments
+    for (let i = 0; i < 3; i++) {
+      const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'gpt-4', messages: [] })
+      });
+      expect(await response.json()).toEqual({ response: 'always-zero' });
+    }
+  });
 });
 
 describe('server match expressions', () => {

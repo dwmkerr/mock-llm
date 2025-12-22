@@ -152,7 +152,7 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     //  This allows fallback rules (without sequence) to handle requests like model
     //  liveness probes without consuming sequence numbers meant for actual calls.
     const matchedRule = matchingRules[matchingRules.length - 1];
-    if (matchedRule.sequence !== undefined) {
+    if (matchedRule.sequence !== undefined && !matchedRule.sequenceIgnore) {
       sequenceCounters[req.path] = currentSequence + 1;
     }
     const body = renderTemplate(matchedRule.response.content, { request });
