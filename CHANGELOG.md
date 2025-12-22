@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.26](https://github.com/dwmkerr/mock-llm/compare/v0.1.25...v0.1.26) (2025-12-22)
+
+
+### Bug Fixes
+
+* only increment sequence counter when winning rule has sequence ([#78](https://github.com/dwmkerr/mock-llm/issues/78)) ([74fb0ea](https://github.com/dwmkerr/mock-llm/commit/74fb0eafd6f704ce68cddb5bcefc12a690c4720f))
+* set MCP server path based on transport type ([#82](https://github.com/dwmkerr/mock-llm/issues/82)) ([c66e1fd](https://github.com/dwmkerr/mock-llm/commit/c66e1fda9226456ed53a9f9d3b18183ed4ca2a1d))
+
 ## [0.1.25](https://github.com/dwmkerr/mock-llm/compare/v0.1.24...v0.1.25) (2025-11-27)
 
 
