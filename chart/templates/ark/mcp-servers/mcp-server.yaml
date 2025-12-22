@@ -15,6 +15,6 @@ spec:
       serviceRef:
         name: {{ include "mock-llm.fullname" . }}
         port: http
-        path: /
+        path: {{ if eq (.Values.ark.mcp.transport | default "http") "sse" }}/sse{{ else }}/mcp{{ end }}
   transport: {{ .Values.ark.mcp.transport | default "http" }}
 {{- end }}
