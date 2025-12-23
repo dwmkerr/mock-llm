@@ -80,8 +80,8 @@ export function createServer(initialConfig: Config, host: string, port: number) 
   });
 
   //  Handle chat completion requests.
-  app.post(/.*/, (req, res) => {
-    const requestBody: ChatCompletionCreateParamsBase = req.body;
+  app.all(/.*/, (req, res) => {
+    const requestBody: ChatCompletionCreateParamsBase = req.body || {};
     const isStreaming = requestBody.stream === true;
 
     //  Get the current sequence counter for this path.
