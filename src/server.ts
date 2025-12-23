@@ -81,7 +81,8 @@ export function createServer(initialConfig: Config, host: string, port: number) 
 
   //  Handle chat completion requests.
   app.all(/.*/, (req, res) => {
-    const requestBody: ChatCompletionCreateParamsBase = req.body || {};
+    // For GET requests, use empty object; for others, use actual body
+    const requestBody: ChatCompletionCreateParamsBase = req.method === 'GET' ? {} : (req.body || {});
     const isStreaming = requestBody.stream === true;
 
     //  Get the current sequence counter for this path.
