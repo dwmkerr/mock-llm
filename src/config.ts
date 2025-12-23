@@ -70,6 +70,8 @@ export function loadConfig(configPath: string): Config {
 
   return {
     ...defaultConfig,
-    ...loadedConfig
+    ...loadedConfig,
+    // Merge rules arrays instead of replacing
+    rules: [...defaultConfig.rules, ...(loadedConfig.rules || [])]
   };
 }
