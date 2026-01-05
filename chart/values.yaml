@@ -204,8 +204,10 @@ ark:
     enabled: false
     # Model name
     name: "gpt-5"
-    # Model type (openai, azure, or bedrock)
-    type: "openai"
+    # Model provider (openai, azure, or bedrock)
+    provider: "openai"
+    # Model type (completions)
+    type: "completions"
     # Model identifier
     model: "gpt-5"
     # Poll interval for health checks
