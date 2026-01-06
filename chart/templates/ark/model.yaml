@@ -9,12 +9,13 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  provider: {{ .Values.ark.model.provider }}
   type: {{ .Values.ark.model.type }}
   model:
     value: {{ .Values.ark.model.model }}
   pollInterval: {{ .Values.ark.model.pollInterval }}
   config:
-    {{- if eq .Values.ark.model.type "openai" }}
+    {{- if eq .Values.ark.model.provider "openai" }}
     openai:
       baseUrl:
         {{- if .Values.ark.model.baseUrl }}
@@ -28,7 +29,7 @@ spec:
       headers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- else if eq .Values.ark.model.type "azure" }}
+    {{- else if eq .Values.ark.model.provider "azure" }}
     azure:
       baseUrl:
         {{- if .Values.ark.model.baseUrl }}
@@ -44,7 +45,7 @@ spec:
       headers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- else if eq .Values.ark.model.type "bedrock" }}
+    {{- else if eq .Values.ark.model.provider "bedrock" }}
     bedrock:
       baseUrl:
         {{- if .Values.ark.model.baseUrl }}
