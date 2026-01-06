@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.27](https://github.com/dwmkerr/mock-llm/compare/v0.1.26...v0.1.27) (2026-01-06)
+
+
+### Bug Fixes
+
+* **chart:** add provider field to Ark Model resource ([#85](https://github.com/dwmkerr/mock-llm/issues/85)) ([7a0e51c](https://github.com/dwmkerr/mock-llm/commit/7a0e51c89a64fffe3151e6061f2d1a3f6656655c))
+* **chart:** add provider field to Ark Model resource ([#87](https://github.com/dwmkerr/mock-llm/issues/87)) ([5978a2e](https://github.com/dwmkerr/mock-llm/commit/5978a2ec5e7a2dea7f3311f4a1ef046079570abf))
+* **chart:** regenerate snapshot to match test-values.yaml ([#88](https://github.com/dwmkerr/mock-llm/issues/88)) ([b56af53](https://github.com/dwmkerr/mock-llm/commit/b56af535a612cbd7a605541b9651caa557987108))
+
 ## [0.1.26](https://github.com/dwmkerr/mock-llm/compare/v0.1.25...v0.1.26) (2025-12-22)
 
 
