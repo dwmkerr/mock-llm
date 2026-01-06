@@ -724,6 +724,56 @@ describe('server method matching', () => {
     expect(getResponse.status).toBe(404);
   });
 
+  it('should handle lowercase method in rule config', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/api/lower',
+          method: 'post',  // lowercase
+          response: { status: 200, content: '{"method":"lowercase"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    const response = await fetch(`${baseUrl}/api/lower`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    expect(response.status).toBe(200);
+  });
+
+  it('should handle POST request with empty body', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/api/empty',
+          method: 'POST',
+          response: { status: 200, content: '{"empty":"body"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    // POST with empty body
+    const response = await fetch(`${baseUrl}/api/empty`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    expect(response.status).toBe(200);
+  });
+
   it('should match all methods when method is not specified in rule', async () => {
     const config = {
       rules: [
