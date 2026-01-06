@@ -14,10 +14,19 @@ describe('config', () => {
         rules: [
           {
             path: '/v1/chat/completions',
+            method: 'POST',
             match: '@',
             response: {
               status: 200,
               content: expect.stringContaining('chatcmpl-{{timestamp}}')
+            }
+          },
+          {
+            path: '/v1/models',
+            method: 'GET',
+            response: {
+              status: 200,
+              content: expect.stringContaining('gpt-5.2')
             }
           }
         ]
