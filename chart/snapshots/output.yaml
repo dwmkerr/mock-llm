@@ -3,12 +3,10 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: test-mock-llm
+  name: test-chart-mock-llm
   labels:
-    helm.sh/chart: mock-llm-0.1.26
     app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
-    app.kubernetes.io/version: "0.1.26"
+    app.kubernetes.io/instance: test-chart
     app.kubernetes.io/managed-by: Helm
 automountServiceAccountToken: false
 ---
@@ -16,12 +14,10 @@ automountServiceAccountToken: false
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-mock-llm
+  name: test-chart-mock-llm
   labels:
-    helm.sh/chart: mock-llm-0.1.26
     app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
-    app.kubernetes.io/version: "0.1.26"
+    app.kubernetes.io/instance: test-chart
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -32,35 +28,31 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: test-chart
 ---
 # Source: mock-llm/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-mock-llm
+  name: test-chart-mock-llm
   labels:
-    helm.sh/chart: mock-llm-0.1.26
     app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
-    app.kubernetes.io/version: "0.1.26"
+    app.kubernetes.io/instance: test-chart
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: mock-llm
-      app.kubernetes.io/instance: test
+      app.kubernetes.io/instance: test-chart
   template:
     metadata:
       labels:
-        helm.sh/chart: mock-llm-0.1.26
         app.kubernetes.io/name: mock-llm
-        app.kubernetes.io/instance: test
-        app.kubernetes.io/version: "0.1.26"
+        app.kubernetes.io/instance: test-chart
         app.kubernetes.io/managed-by: Helm
     spec:
-      serviceAccountName: test-mock-llm
+      serviceAccountName: test-chart-mock-llm
       terminationGracePeriodSeconds: 30
       securityContext:
         fsGroup: 1000
@@ -74,7 +66,6 @@ spec:
               drop:
               - ALL
             readOnlyRootFilesystem: true
-          image: "ghcr.io/dwmkerr/mock-llm:0.1.26"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -115,64 +106,36 @@ spec:
 apiVersion: ark.mckinsey.com/v1alpha1
 kind: MCPServer
 metadata:
-  name: test-mock-llm-mcp
+  name: test-chart-mock-llm-mcp
   labels:
-    helm.sh/chart: mock-llm-0.1.26
     app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
-    app.kubernetes.io/version: "0.1.26"
+    app.kubernetes.io/instance: test-chart
     app.kubernetes.io/managed-by: Helm
 spec:
   description: Mock MCP Server
   address:
     valueFrom:
       serviceRef:
-        name: test-mock-llm
+        name: test-chart-mock-llm
         port: http
-        path: /mcp
-  transport: http
----
-# Source: mock-llm/templates/ark/model.yaml
-apiVersion: ark.mckinsey.com/v1alpha1
-kind: Model
-metadata:
-  name: gpt-5
-  labels:
-    helm.sh/chart: mock-llm-0.1.26
-    app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
-    app.kubernetes.io/version: "0.1.26"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  provider: openai
-  type: completions
-  model:
-    value: gpt-5
-  pollInterval: 3s
-  config:
-    openai:
-      baseUrl:
-        value: http://test-mock-llm.default.svc.cluster.local:6556/v1
-      apiKey:
-        value: mock-api-key
+        path: /sse
+  transport: sse
 ---
 # Source: mock-llm/templates/ark/tools/echo-tool.yaml
 apiVersion: ark.mckinsey.com/v1alpha1
 kind: Tool
 metadata:
-  name: test-mock-llm-echo-tool
+  name: test-chart-mock-llm-echo-tool
   labels:
-    helm.sh/chart: mock-llm-0.1.26
     app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
-    app.kubernetes.io/version: "0.1.26"
+    app.kubernetes.io/instance: test-chart
     app.kubernetes.io/managed-by: Helm
 spec:
   description: Echo tool for MCP server that returns the input as output
   type: mcp
   mcp:
     mcpServerRef:
-      name: test-mock-llm-mcp
+      name: test-chart-mock-llm-mcp
     toolName: echo-tool
   inputSchema:
     params:
@@ -184,12 +147,10 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "test-mock-llm-test-connection"
+  name: "test-chart-mock-llm-test-connection"
   labels:
-    helm.sh/chart: mock-llm-0.1.26
     app.kubernetes.io/name: mock-llm
-    app.kubernetes.io/instance: test
-    app.kubernetes.io/version: "0.1.26"
+    app.kubernetes.io/instance: test-chart
     app.kubernetes.io/managed-by: Helm
   annotations:
     "helm.sh/hook": test
@@ -202,7 +163,7 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['test-mock-llm:6556']
+      args: ['test-chart-mock-llm:6556']
       securityContext:
         allowPrivilegeEscalation: false
         capabilities:
