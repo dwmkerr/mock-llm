@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.28](https://github.com/dwmkerr/mock-llm/compare/v0.1.27...v0.1.28) (2026-01-06)
+
+
+### Features
+
+* add method matching and GET /v1/models support ([#90](https://github.com/dwmkerr/mock-llm/issues/90)) ([67e2846](https://github.com/dwmkerr/mock-llm/commit/67e28465eeb34e5ec131ee71ff8f7b9f10d4ffca))
+
 ## [0.1.27](https://github.com/dwmkerr/mock-llm/compare/v0.1.26...v0.1.27) (2026-01-06)
 
 
