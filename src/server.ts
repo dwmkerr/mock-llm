@@ -79,8 +79,8 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     res.json(currentConfig);
   });
 
-  //  Handle chat completion requests.
-  app.all(/.*/, (req, res) => {
+  //  Handle requests via rules matching.
+  app.all(/.*/, (req, res, next) => {
     // For GET requests, use empty object; for others, use actual body
     const requestBody: ChatCompletionCreateParamsBase = req.method === 'GET' ? {} : (req.body || {});
     const isStreaming = requestBody.stream === true;
@@ -88,13 +88,17 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     //  Get the current sequence counter for this path.
     const currentSequence = sequenceCounters[req.path] || 0;
 
-    //  Filter rules by path (typically 'v1/completions').
-    //  If no rules for this path we fail.
-    const matchingPathRules = currentConfig.rules.filter(rule =>
-      new RegExp(rule.path).test(req.path)
-    );
+    //  Filter rules by path and optionally by method.
+    //  Method filtering only applies when a rule explicitly specifies a method.
+    //  Rules without a method field match all HTTP methods.
+    //  If no rules match, fall through to 404 handler.
+    const matchingPathRules = currentConfig.rules.filter(rule => {
+      const pathMatches = new RegExp(rule.path).test(req.path);
+      const methodMatches = !rule.method || rule.method.toUpperCase() === req.method;
+      return pathMatches && methodMatches;
+    });
     if (matchingPathRules.length === 0) {
-      throw new Error(`No matching rule found for path: ${req.path}`);
+      return next();
     }
 
     //  Build the request object that will be available to match and template.
@@ -129,7 +133,7 @@ export function createServer(initialConfig: Config, host: string, port: number) 
       }
     }
     if (matchingRules.length === 0) {
-      throw new Error(`No matching rule found for request (sequence: ${currentSequence})`);
+      return next();
     }
 
     //  Render the response, expanding any expressions from the matched rule.

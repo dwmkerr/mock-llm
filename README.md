@@ -87,12 +87,13 @@ Mock LLM also has basic support for the [A2A (Agent-to-Agent) protocol](docs/a2a
 
 Responses are configured using a `yaml` file loaded from `mock-llm.yaml` in the current working directory. Rules are evaluated in order - last match wins.
 
-The default configuration echoes the last user message:
+The default configuration echoes the last user message and provides a `/v1/models` endpoint:
 
 ```yaml
 rules:
   # Default echo rule
   - path: "/v1/chat/completions"
+    method: "POST"
     # The JMESPath expression '@' always matches.
     match: "@"
     response:
@@ -110,7 +111,25 @@ rules:
             "finish_reason": "stop"
           }]
         }
+
+  # List models endpoint
+  - path: "/v1/models"
+    method: "GET"
+    response:
+      status: 200
+      content: |
+        {
+          "object": "list",
+          "data": [{"id": "gpt-5.2", "object": "model", "owned_by": "openai"}]
+        }
 ```
+
+Each rule supports these fields:
+- `path` - Regular expression to match the request path
+- `method` - HTTP method to match (GET, POST, etc). If not specified, matches all methods
+- `match` - JMESPath expression to match request content (optional)
+- `sequence` - Match by request order (optional)
+- `response` - The response to return (status and content)
 
 ### Customising Responses
 
@@ -421,6 +440,7 @@ These can be a reference for your own tests. Each sample is also run as part of 
 | [09-token-usage.sh](samples/09-token-usage.sh) | Test token usage tracking. |
 | [10-mcp-inspect-headers.sh](samples/10-mcp-inspect-headers.sh) | Test MCP header inspection. |
 | [11-sequential-tool-calling.sh](samples/11-sequential-tool-calling.sh) | Test sequential responses for tool-calling flows. |
+| [12-list-models.sh](samples/12-list-models.sh) | Test GET /v1/models endpoint. |
 
 Each sample below is a link to a real-world deterministic integration test in [Ark](https://github.com/mckinsey/agents-at-scale-ark) that uses `mock-llm` features. These tests can be used as a reference for your own tests.
 

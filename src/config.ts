@@ -9,6 +9,7 @@ export interface Response {
 
 export interface Rule {
   path: string;
+  method?: string;  // HTTP method (GET, POST, etc). If not set, matches all methods.
   match?: string;
   sequence?: number;
   response: Response;
@@ -33,6 +34,7 @@ export function getDefaultConfig(): Config {
     rules: [
       {
         path: '/v1/chat/completions',
+        method: 'POST',
         match: '@',
         response: {
           status: 200,
@@ -47,6 +49,19 @@ export function getDefaultConfig(): Config {
     },
     "finish_reason": "stop"
   }]
+}`
+        }
+      },
+      {
+        path: '/v1/models',
+        method: 'GET',
+        response: {
+          status: 200,
+          content: `{
+  "object": "list",
+  "data": [
+    {"id": "gpt-5.2", "object": "model", "owned_by": "openai"}
+  ]
 }`
         }
       }
@@ -70,8 +85,6 @@ export function loadConfig(configPath: string): Config {
 
   return {
     ...defaultConfig,
-    ...loadedConfig,
-    // Merge rules arrays instead of replacing
-    rules: [...defaultConfig.rules, ...(loadedConfig.rules || [])]
+    ...loadedConfig
   };
 }

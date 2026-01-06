@@ -546,7 +546,7 @@ describe('server sequence matching', () => {
     expect(await response2.json()).toEqual({ response: 'weather-second' });
   });
 
-  it('should return error when no sequence matches', async () => {
+  it('should return 404 when no sequence matches', async () => {
     const config = {
       rules: [
         {
@@ -570,16 +570,16 @@ describe('server sequence matching', () => {
       body: JSON.stringify({ model: 'gpt-4', messages: [] })
     });
 
-    // Second request has no matching sequence
+    // Second request has no matching sequence - falls through to 404
     const response = await fetch(`${baseUrl}/v1/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'gpt-4', messages: [] })
     });
 
-    expect(response.status).toBe(500);
-    const json = await response.json() as { message: string };
-    expect(json.message).toContain('No matching rule found for request (sequence: 1)');
+    expect(response.status).toBe(404);
+    const json = await response.json() as { error: string };
+    expect(json.error).toBe('Not Found');
   });
 
   it('should not increment sequence counter for fallback rules (model liveness probes)', async () => {
@@ -656,6 +656,109 @@ describe('server sequence matching', () => {
       body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'system', content: 'You are agent-b' }] })
     });
     expect(await response2.json()).toEqual({ response: 'second' });
+  });
+});
+
+describe('server method matching', () => {
+  const app = createServer(getDefaultConfig(), 'localhost', 6556);
+  let server: ReturnType<typeof app.listen>;
+  let baseUrl: string;
+
+  beforeAll((done) => {
+    server = app.listen(0, () => {
+      const address = server.address() as { port: number };
+      baseUrl = `http://localhost:${address.port}`;
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  beforeEach(async () => {
+    await fetch(`${baseUrl}/config`, { method: 'DELETE' });
+  });
+
+  it('should match GET /v1/models from default config', async () => {
+    const response = await fetch(`${baseUrl}/v1/models`, {
+      method: 'GET'
+    });
+
+    expect(response.status).toBe(200);
+    const json = await response.json() as { object: string; data: Array<{ id: string }> };
+    expect(json.object).toBe('list');
+    expect(json.data[0].id).toBe('gpt-5.2');
+  });
+
+  it('should only match rules with explicit method when method is specified', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/api/test',
+          method: 'POST',
+          response: { status: 200, content: '{"method":"post-only"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    // POST should match
+    const postResponse = await fetch(`${baseUrl}/api/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    expect(postResponse.status).toBe(200);
+    expect(await postResponse.json()).toEqual({ method: 'post-only' });
+
+    // GET should not match - returns 404
+    const getResponse = await fetch(`${baseUrl}/api/test`, {
+      method: 'GET'
+    });
+    expect(getResponse.status).toBe(404);
+  });
+
+  it('should match all methods when method is not specified in rule', async () => {
+    const config = {
+      rules: [
+        {
+          path: '/api/any',
+          response: { status: 200, content: '{"method":"any"}' }
+        }
+      ]
+    };
+
+    await fetch(`${baseUrl}/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+
+    // GET should match
+    const getResponse = await fetch(`${baseUrl}/api/any`, { method: 'GET' });
+    expect(getResponse.status).toBe(200);
+
+    // POST should match
+    const postResponse = await fetch(`${baseUrl}/api/any`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    expect(postResponse.status).toBe(200);
+
+    // PUT should match
+    const putResponse = await fetch(`${baseUrl}/api/any`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    expect(putResponse.status).toBe(200);
   });
 });
 
