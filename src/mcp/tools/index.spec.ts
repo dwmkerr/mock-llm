@@ -113,6 +113,101 @@ describe('MCP Tools', () => {
     const headers = JSON.parse(response.content[0].text as string);
     expect(headers).toEqual({});
   });
+
+  it('wait tool should be in tools/list', async () => {
+    const client = await getMcpServerClientStub();
+
+    const response = await client.request(
+      {
+        method: 'tools/list',
+      },
+      ListToolsResultSchema
+    );
+
+    expect(response.tools).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'wait',
+          description: 'waits for the specified number of milliseconds',
+        })
+      ])
+    );
+  });
+
+  it('wait tool should wait for the specified time', async () => {
+    const client = await getMcpServerClientStub();
+
+    const startTime = Date.now();
+    const waitTime = 100; // 100ms
+
+    const response = await client.request({
+      method: 'tools/call',
+      params: {
+        name: 'wait',
+        arguments: {
+          milliseconds: waitTime
+        }
+      }
+    }, CallToolResultSchema);
+
+    const elapsedTime = Date.now() - startTime;
+
+    expect(response.content).toEqual([
+      {
+        type: 'text',
+        text: `Waited for ${waitTime}ms`
+      }
+    ]);
+
+    // Verify it actually waited (with some tolerance for execution time)
+    expect(elapsedTime).toBeGreaterThanOrEqual(waitTime);
+    expect(elapsedTime).toBeLessThan(waitTime + 50); // Allow 50ms tolerance
+  });
+
+  it('bitcoin_historical_prices tool should be in tools/list', async () => {
+    const client = await getMcpServerClientStub();
+
+    const response = await client.request(
+      {
+        method: 'tools/list',
+      },
+      ListToolsResultSchema
+    );
+
+    expect(response.tools).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'bitcoin_historical_prices',
+          description: 'fetches Bitcoin historical prices from the sample API',
+        })
+      ])
+    );
+  });
+
+  it('bitcoin_historical_prices tool should fetch and return Bitcoin prices', async () => {
+    const client = await getMcpServerClientStub();
+
+    const response = await client.request({
+      method: 'tools/call',
+      params: {
+        name: 'bitcoin_historical_prices',
+        arguments: {}
+      }
+    }, CallToolResultSchema);
+
+    expect(response.content).toHaveLength(1);
+    expect(response.content[0].type).toBe('text');
+
+    const data = JSON.parse(response.content[0].text as string);
+    expect(Array.isArray(data)).toBe(true);
+    expect(data.length).toBeGreaterThan(0);
+
+    // Verify structure of first item
+    if (data.length > 0) {
+      expect(data[0]).toHaveProperty('date');
+      expect(data[0]).toHaveProperty('price');
+    }
+  });
 });
 
 async function getMcpServerClientStub(): Promise<Client> {

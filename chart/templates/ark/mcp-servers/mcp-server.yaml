@@ -17,4 +17,5 @@ spec:
         port: http
         path: {{ if eq (.Values.ark.mcp.transport | default "http") "sse" }}/sse{{ else }}/mcp{{ end }}
   transport: {{ .Values.ark.mcp.transport | default "http" }}
+  timeout: {{ .Values.ark.mcp.timeout | default "30s" }}
 {{- end }}
