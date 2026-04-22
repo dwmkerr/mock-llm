@@ -28,6 +28,9 @@ export interface OAuthMetadataConfig {
   registrationEndpointEnabled?: boolean;
   issuerOverride?: string;
   resourcePath?: string;
+  // Permit non-HTTPS, non-loopback issuer URLs (e.g. Kubernetes cluster DNS).
+  // Test fixture only — must not be enabled in anything resembling production.
+  allowInsecureIssuer?: boolean;
 }
 
 export interface OAuthConfig {
