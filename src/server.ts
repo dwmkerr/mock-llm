@@ -8,6 +8,7 @@ import { renderTemplate } from './template';
 import { printConfigSummary } from './config-logger';
 import { setupA2ARoutes } from './a2a/routes';
 import { setupHttpMcpServer } from './mcp/http-server';
+import { setupOAuth } from './oauth';
 import { streamResponse } from './streaming';
 
 export function createServer(initialConfig: Config, host: string, port: number) {
@@ -25,6 +26,9 @@ export function createServer(initialConfig: Config, host: string, port: number) 
     console.log(`${req.method} ${req.path}`);
     next();
   });
+
+  // OAuth must be wired before MCP so the Bearer gate runs first.
+  setupOAuth(app, () => currentConfig, { host, port });
 
   // Setup A2A and MCP routes
   setupA2ARoutes(app, host, port);

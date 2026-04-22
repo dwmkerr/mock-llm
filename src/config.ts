@@ -2,6 +2,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 
+import { OAuthConfig } from './oauth/types';
+
+export { OAuthConfig } from './oauth/types';
+
 export interface Response {
   status: number;
   content: string;
@@ -23,6 +27,7 @@ export interface StreamingConfig {
 export interface Config {
   streaming: StreamingConfig;
   rules: Rule[];
+  oauth?: OAuthConfig;
 }
 
 export function getDefaultConfig(): Config {
