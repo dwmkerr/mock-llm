@@ -3,8 +3,10 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 
 import { OAuthConfig } from './oauth/types';
+import { TLSConfig } from './tls';
 
 export { OAuthConfig } from './oauth/types';
+export { TLSConfig } from './tls';
 
 export interface Response {
   status: number;
@@ -28,6 +30,7 @@ export interface Config {
   streaming: StreamingConfig;
   rules: Rule[];
   oauth?: OAuthConfig;
+  tls?: TLSConfig;
 }
 
 export function getDefaultConfig(): Config {

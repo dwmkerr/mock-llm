@@ -196,6 +196,32 @@ affinity: {}
 # Use an existing ConfigMap instead of creating one from config above
 # existingConfigMap: ""
 
+# TLS (HTTPS) support. Off by default — mock-llm ships as a fixture, so plain
+# HTTP is the default. Enable when a consumer (e.g. a Go MCP SDK client) needs
+# real HTTPS discovery per RFC 8414 / RFC 9728.
+#
+# When enabled with no overrides, the chart generates a self-signed cert via
+# Helm's built-in genSelfSignedCert and creates two resources:
+#
+#   - Secret    {fullname}-tls  — tls.crt + tls.key, mounted into the pod
+#   - ConfigMap {fullname}-ca   — ca.crt only, consumable as a trust bundle
+#
+# Clients trust the cert by mounting the ConfigMap and pointing SSL_CERT_FILE
+# at /path/ca.crt. To bring your own (e.g. cert-manager), set existingSecret
+# and existingCAConfigMap.
+tls:
+  enabled: false
+  # Extra Subject Alternative Names appended to the chart-derived defaults
+  # (fullname, fullname.ns, fullname.ns.svc, fullname.ns.svc.cluster.local,
+  # localhost, 127.0.0.1).
+  extraSANs: []
+  # Name of a pre-existing TLS secret (type kubernetes.io/tls). When set, the
+  # chart does not generate a cert and uses this secret instead.
+  existingSecret: ""
+  # Name of a pre-existing ConfigMap containing the CA for this cert, used by
+  # consumers. When set, the chart does not emit the generated CA ConfigMap.
+  existingCAConfigMap: ""
+
 # Ark Model CRD configuration (optional)
 # Requires Ark to be installed: https://github.com/mckinsey/agents-at-scale
 ark:
