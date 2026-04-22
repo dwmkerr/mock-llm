@@ -98,4 +98,53 @@ describe('main', () => {
       keyPath: '/env/key'
     });
   });
+
+  it('falls back to config.tls paths when MOCK_LLM_TLS_ENABLED is set but CERT/KEY env vars are not', async () => {
+    // Covers the nullish-coalescing branch: enable via env, but keep the
+    // cert/key paths that were already in the mounted config file.
+    const mockConfig = {
+      rules: [],
+      tls: { enabled: false, certPath: '/file/cert', keyPath: '/file/key' }
+    };
+    (getConfigPath as jest.Mock).mockReturnValue('/app/mock-llm.yaml');
+    (loadConfig as jest.Mock).mockReturnValue(mockConfig);
+    (loadTLSCredentials as jest.Mock).mockReturnValue(undefined);
+
+    process.env.MOCK_LLM_TLS_ENABLED = 'true';
+
+    await jest.isolateModulesAsync(async () => {
+      await import('./main');
+    });
+
+    expect(loadTLSCredentials).toHaveBeenCalledWith({
+      enabled: true,
+      certPath: '/file/cert',
+      keyPath: '/file/key'
+    });
+  });
+
+  it('leaves config.tls untouched when MOCK_LLM_TLS_ENABLED is not "true"', async () => {
+    const mockConfig = {
+      rules: [],
+      tls: { enabled: true, certPath: '/file/cert', keyPath: '/file/key' }
+    };
+    (getConfigPath as jest.Mock).mockReturnValue('/app/mock-llm.yaml');
+    (loadConfig as jest.Mock).mockReturnValue(mockConfig);
+    (loadTLSCredentials as jest.Mock).mockReturnValue(undefined);
+
+    // Anything other than the literal "true" leaves config alone.
+    process.env.MOCK_LLM_TLS_ENABLED = 'false';
+    process.env.MOCK_LLM_TLS_CERT = '/env/cert';
+    process.env.MOCK_LLM_TLS_KEY = '/env/key';
+
+    await jest.isolateModulesAsync(async () => {
+      await import('./main');
+    });
+
+    expect(loadTLSCredentials).toHaveBeenCalledWith({
+      enabled: true,
+      certPath: '/file/cert',
+      keyPath: '/file/key'
+    });
+  });
 });
