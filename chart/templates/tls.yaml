@@ -1,0 +1,45 @@
+{{/*
+When tls.enabled is true and the user has not supplied an existingSecret, the
+chart generates a self-signed cert via genSelfSignedCert. The private key is
+stored in a Secret (mounted into the mock-llm pod); the public cert is also
+exposed in a ConfigMap so consumers can mount it as a trust bundle (e.g. via
+SSL_CERT_FILE) without granting Secret read access.
+
+The cert is regenerated on every `helm install` / `helm upgrade`. Pin an
+external cert by setting `tls.existingSecret` + `tls.existingCAConfigMap`.
+*/}}
+{{- if .Values.tls.enabled }}
+{{- if and (not .Values.tls.existingSecret) (not .Values.tls.existingCAConfigMap) }}
+{{- $fullname := include "mock-llm.fullname" . -}}
+{{- $ns := .Release.Namespace -}}
+{{- $sans := concat (list
+    $fullname
+    (printf "%s.%s" $fullname $ns)
+    (printf "%s.%s.svc" $fullname $ns)
+    (printf "%s.%s.svc.cluster.local" $fullname $ns)
+    "localhost"
+    "127.0.0.1"
+  ) .Values.tls.extraSANs -}}
+{{- $cert := genSelfSignedCert (first $sans) (list "127.0.0.1") $sans 3650 -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $fullname }}-tls
+  labels:
+    {{- include "mock-llm.labels" . | nindent 4 }}
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ $cert.Cert | b64enc }}
+  tls.key: {{ $cert.Key | b64enc }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-ca
+  labels:
+    {{- include "mock-llm.labels" . | nindent 4 }}
+data:
+  ca.crt: |
+{{ $cert.Cert | indent 4 }}
+{{- end }}
+{{- end }}

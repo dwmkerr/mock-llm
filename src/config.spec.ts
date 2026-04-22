@@ -1,5 +1,8 @@
 import { describe, it, expect } from '@jest/globals';
-import { getDefaultConfig, getConfigPath } from './config';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { getDefaultConfig, getConfigPath, loadConfig } from './config';
 
 describe('config', () => {
   describe('getDefaultConfig', () => {
@@ -39,6 +42,36 @@ describe('config', () => {
       const configPath = getConfigPath();
 
       expect(configPath).toMatch(/mock-llm\.yaml$/);
+    });
+  });
+
+  describe('loadConfig', () => {
+    it('returns defaults when the file does not exist', () => {
+      const config = loadConfig('/nonexistent/mock-llm.yaml');
+      expect(config).toEqual(getDefaultConfig());
+    });
+
+    it('merges loaded YAML over the defaults, preserving the tls block', () => {
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mock-llm-config-'));
+      const file = path.join(tmp, 'mock-llm.yaml');
+      fs.writeFileSync(file,
+        'tls:\n' +
+        '  enabled: true\n' +
+        '  certPath: /etc/mock-llm/tls/tls.crt\n' +
+        '  keyPath: /etc/mock-llm/tls/tls.key\n'
+      );
+      try {
+        const config = loadConfig(file);
+        expect(config.tls).toEqual({
+          enabled: true,
+          certPath: '/etc/mock-llm/tls/tls.crt',
+          keyPath: '/etc/mock-llm/tls/tls.key'
+        });
+        // Defaults still present for fields not in the YAML.
+        expect(config.streaming).toEqual(getDefaultConfig().streaming);
+      } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+      }
     });
   });
 });
