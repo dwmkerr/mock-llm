@@ -24,6 +24,7 @@ The server can be configured to provide different responses based on the input, 
     - [Sequential Responses](#sequential-responses)
     - [Streaming Configuration](#streaming-configuration)
 - [MCP (Model Context Protocol) Mocking](#mcp-model-context-protocol-mocking)
+- [MCP OAuth Emulation](#mcp-oauth-emulation)
 - [A2A (Agent to Agent Protocol) Mocking](#a2a-agent-to-agent-protocol-mocking)
 - [Deploying to Kubernetes with Helm](#deploying-to-kubernetes-with-helm)
 - [Examples](#examples)
@@ -299,6 +300,10 @@ This enables deterministic testing of streaming protocol responses. Errors condi
 
 Mock-LLM exposes MCP servers and tools which support testing the MCP protocol, details are in the [MCP Documentation](docs/mcp.md).
 
+## MCP OAuth Emulation
+
+Mock-LLM can also emulate an OAuth 2.1 authorization server in front of its MCP endpoint, so you can test OAuth-protected MCP servers end-to-end without depending on a real IdP. It serves RFC 8414 / RFC 9728 discovery, RFC 7591 Dynamic Client Registration, Authorization Code + PKCE, and refresh-token flows, plus a small set of control endpoints for test orchestration. See the [MCP OAuth Documentation](docs/mcp-oauth.md).
+
 ## A2A (Agent to Agent Protocol) Mocking
 
 Mock-LLM exposes A2A servers and tools which support testing the A2A protocol, details are in the [A2A Documentation](docs/a2a.md).
@@ -411,6 +416,12 @@ npm run lint
 npm run test
 ```
 
+Run the end-to-end [samples](#samples) suite:
+
+```bash
+npm run test:samples
+```
+
 Test and inspect the MCP Server running locally:
 
 ```bash
@@ -441,6 +452,9 @@ These can be a reference for your own tests. Each sample is also run as part of 
 | [10-mcp-inspect-headers.sh](samples/10-mcp-inspect-headers.sh) | Test MCP header inspection. |
 | [11-sequential-tool-calling.sh](samples/11-sequential-tool-calling.sh) | Test sequential responses for tool-calling flows. |
 | [12-list-models.sh](samples/12-list-models.sh) | Test GET /v1/models endpoint. |
+| [14-mcp-oauth-discovery.sh](samples/14-mcp-oauth-discovery.sh) | Test OAuth 401 challenge + RFC 9728 / RFC 8414 discovery metadata on protected MCP endpoint. |
+| [15-mcp-oauth-pkce-flow.sh](samples/15-mcp-oauth-pkce-flow.sh) | Test full OAuth 2.1 Authorization Code + PKCE flow (DCR, authorize, token exchange, authenticated MCP initialize). |
+| [16-mcp-oauth-refresh.sh](samples/16-mcp-oauth-refresh.sh) | Test refresh-token grant, refresh-token rotation, and `/oauth/revoke` + `/oauth/expire` control endpoints. |
 
 Each sample below is a link to a real-world deterministic integration test in [Ark](https://github.com/mckinsey/agents-at-scale-ark) that uses `mock-llm` features. These tests can be used as a reference for your own tests.
 
