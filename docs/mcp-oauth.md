@@ -67,9 +67,28 @@ oauth:
     registrationEndpointEnabled: true        # default — set false to hide /register
     issuerOverride: "http://localhost:6556/" # default computed from host + port
     resourcePath: "/mcp"                     # default
+    allowInsecureIssuer: false               # default — see "Insecure issuer mode" below
 ```
 
-Only `issuerOverride` and `resourcePath` are read at server boot; everything else is evaluated per request so you can flip state mid-test via `PATCH /config`.
+Only `issuerOverride`, `resourcePath`, and `allowInsecureIssuer` are read at server boot; everything else is evaluated per request so you can flip state mid-test via `PATCH /config`.
+
+## Insecure issuer mode (test fixtures only)
+
+The MCP SDK's `mcpAuthRouter` enforces RFC 8414 by rejecting any issuer URL that is neither HTTPS nor `localhost`/`127.0.0.1`. When mock-llm runs inside Kubernetes as a fixture, the natural issuer is the cluster DNS name (e.g. `http://mock-llm.test-ns.svc.cluster.local:6556`), which is neither. Adding TLS to a test fixture is disproportionate.
+
+Setting `metadata.allowInsecureIssuer: true` opts out of the SDK's router and mounts the SDK's exported handlers directly with metadata mock-llm builds itself. The emitted `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource` documents are structurally identical to the SDK's output (covered by a parity test).
+
+```yaml
+# mock-llm-values.yaml for a Kubernetes fixture
+config:
+  oauth:
+    protectedPaths: ["/mcp"]
+    metadata:
+      allowInsecureIssuer: true
+      issuerOverride: "http://mock-llm.test-ns.svc.cluster.local:6556/"
+```
+
+**Do not enable this in anything resembling production.** The flag is intended for integration test fixtures in ephemeral namespaces only. The default (`false`) preserves the SDK's strict HTTPS-only behaviour.
 
 ## Test control endpoints
 

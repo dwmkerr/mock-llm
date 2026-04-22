@@ -248,6 +248,129 @@ describe('oauth end-to-end', () => {
     });
   });
 
+  describe('allowInsecureIssuer', () => {
+    it('boots with a non-HTTPS, non-loopback issuer and serves equivalent metadata', async () => {
+      const clusterIssuer = 'http://mock-llm.test-ns.svc.cluster.local:6556/';
+      const cfg: Config = withOAuth({
+        protectedPaths: ['/mcp'],
+        metadata: {
+          allowInsecureIssuer: true,
+          issuerOverride: clusterIssuer
+        }
+      });
+      const insecureApp = createServer(cfg, 'localhost', 6556);
+      const insecureServer = insecureApp.listen(0);
+      const { port } = insecureServer.address() as { port: number };
+      try {
+        const asMeta = await fetch(`http://localhost:${port}/.well-known/oauth-authorization-server`)
+          .then(r => r.json() as Promise<Record<string, unknown>>);
+        expect(asMeta.issuer).toBe(clusterIssuer);
+        expect(asMeta.authorization_endpoint).toBe(`${clusterIssuer}authorize`);
+        expect(asMeta.token_endpoint).toBe(`${clusterIssuer}token`);
+        expect(asMeta.registration_endpoint).toBe(`${clusterIssuer}register`);
+        expect(asMeta.code_challenge_methods_supported).toEqual(['S256']);
+        expect(asMeta.grant_types_supported).toEqual(['authorization_code', 'refresh_token']);
+
+        const prmMeta = await fetch(`http://localhost:${port}/.well-known/oauth-protected-resource/mcp`)
+          .then(r => r.json() as Promise<Record<string, unknown>>);
+        expect(prmMeta.resource).toBe(`${clusterIssuer}mcp`);
+        expect(prmMeta.authorization_servers).toEqual([clusterIssuer]);
+        expect(prmMeta.resource_name).toBe('Mock MCP Resource');
+
+        // Bearer gate still challenges with RFC 9728 pointer to the cluster issuer.
+        const challenge = await fetch(`http://localhost:${port}/mcp/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream' },
+          body: PROBE_INIT
+        });
+        expect(challenge.status).toBe(401);
+        const wwwAuth = challenge.headers.get('www-authenticate')!;
+        expect(wwwAuth).toContain('resource_metadata=');
+        expect(wwwAuth).toContain(clusterIssuer);
+
+        // DCR still works via the manually mounted handler.
+        const dcr = await fetch(`http://localhost:${port}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            client_name: 'insecure-test',
+            redirect_uris: ['http://127.0.0.1:0/cb'],
+            grant_types: ['authorization_code'],
+            response_types: ['code'],
+            token_endpoint_auth_method: 'none'
+          })
+        });
+        expect(dcr.status).toBe(201);
+      } finally {
+        insecureServer.close();
+      }
+    });
+
+    it('still accepts HTTPS issuers when the flag is set', async () => {
+      const cfg: Config = withOAuth({
+        protectedPaths: [],
+        metadata: {
+          allowInsecureIssuer: true,
+          issuerOverride: 'https://auth.example.com/'
+        }
+      });
+      const httpsApp = createServer(cfg, 'localhost', 6556);
+      const httpsServer = httpsApp.listen(0);
+      const { port } = httpsServer.address() as { port: number };
+      try {
+        const meta = await fetch(`http://localhost:${port}/.well-known/oauth-authorization-server`)
+          .then(r => r.json() as Promise<Record<string, unknown>>);
+        expect(meta.issuer).toBe('https://auth.example.com/');
+      } finally {
+        httpsServer.close();
+      }
+    });
+
+    it('still rejects a non-HTTPS, non-loopback issuer when the flag is absent', () => {
+      const cfg: Config = withOAuth({
+        protectedPaths: ['/mcp'],
+        metadata: { issuerOverride: 'http://mock-llm.test-ns.svc.cluster.local:6556/' }
+      });
+      // mcpAuthRouter throws synchronously during setup.
+      expect(() => createServer(cfg, 'localhost', 6556)).toThrow(/Issuer URL must be HTTPS/);
+    });
+
+    it('emits metadata structurally equivalent to the SDK router for a loopback issuer', async () => {
+      // Golden: SDK path with a loopback (HTTPS-exempt) issuer.
+      const sdkApp = createServer(withOAuth({
+        protectedPaths: ['/mcp'],
+        metadata: { issuerOverride: 'http://localhost:6556/' }
+      }), 'localhost', 6556);
+      const sdkServer = sdkApp.listen(0);
+      const sdkPort = (sdkServer.address() as { port: number }).port;
+
+      // Feature-on path with the same loopback issuer — output must match.
+      const insecureApp = createServer(withOAuth({
+        protectedPaths: ['/mcp'],
+        metadata: { allowInsecureIssuer: true, issuerOverride: 'http://localhost:6556/' }
+      }), 'localhost', 6556);
+      const insecureServer = insecureApp.listen(0);
+      const insecurePort = (insecureServer.address() as { port: number }).port;
+
+      try {
+        const [sdkAs, insecureAs] = await Promise.all([
+          fetch(`http://localhost:${sdkPort}/.well-known/oauth-authorization-server`).then(r => r.json()),
+          fetch(`http://localhost:${insecurePort}/.well-known/oauth-authorization-server`).then(r => r.json())
+        ]);
+        expect(insecureAs).toEqual(sdkAs);
+
+        const [sdkPrm, insecurePrm] = await Promise.all([
+          fetch(`http://localhost:${sdkPort}/.well-known/oauth-protected-resource/mcp`).then(r => r.json()),
+          fetch(`http://localhost:${insecurePort}/.well-known/oauth-protected-resource/mcp`).then(r => r.json())
+        ]);
+        expect(insecurePrm).toEqual(sdkPrm);
+      } finally {
+        sdkServer.close();
+        insecureServer.close();
+      }
+    });
+  });
+
   describe('refresh grant', () => {
     it('refresh issues a new access token and keeps original refresh_token when rotation is off', async () => {
       const cfg: Config = withOAuth({
