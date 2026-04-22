@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.29](https://github.com/dwmkerr/mock-llm/compare/v0.1.28...v0.1.29) (2026-04-22)
+
+
+### Features
+
+* add MCP OAuth 2.1 emulation for protected MCP servers ([#92](https://github.com/dwmkerr/mock-llm/issues/92)) ([7ccc1ff](https://github.com/dwmkerr/mock-llm/commit/7ccc1ff41d744ceb8d89a9a3358f9182e518bbf9))
+
 ## [0.1.28](https://github.com/dwmkerr/mock-llm/compare/v0.1.27...v0.1.28) (2026-01-06)
 
 
