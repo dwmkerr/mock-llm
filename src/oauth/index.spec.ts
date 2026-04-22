@@ -225,6 +225,29 @@ describe('oauth end-to-end', () => {
     });
   });
 
+  describe('setup options', () => {
+    it('honours metadata.issuerOverride and survives bad regex in protectedPaths', async () => {
+      const cfg: Config = withOAuth({
+        protectedPaths: ['/mcp', '[invalid(regex'],
+        metadata: { issuerOverride: 'http://127.0.0.1:6556/' }
+      });
+      const altApp = createServer(cfg, 'localhost', 6556);
+      const altServer = altApp.listen(0);
+      const { port } = altServer.address() as { port: number };
+      try {
+        const meta = await fetch(`http://localhost:${port}/.well-known/oauth-authorization-server`)
+          .then(r => r.json() as Promise<Record<string, unknown>>);
+        expect(meta.issuer).toBe('http://127.0.0.1:6556/');
+
+        // Request an unprotected, unmatched path — the bad-regex entry must not throw.
+        const unprotected = await fetch(`http://localhost:${port}/health`);
+        expect(unprotected.status).toBe(200);
+      } finally {
+        altServer.close();
+      }
+    });
+  });
+
   describe('refresh grant', () => {
     it('refresh issues a new access token and keeps original refresh_token when rotation is off', async () => {
       const cfg: Config = withOAuth({

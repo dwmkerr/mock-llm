@@ -94,6 +94,31 @@ describe('control endpoints', () => {
       expect(res.status).toBe(204);
       expect(store.isValid(config, issued.accessToken)).toBe(false);
     });
+
+    it('rejects missing token field with 400', async () => {
+      const res = await fetch(`${base}/oauth/expire`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('POST /oauth/issue (config gating)', () => {
+    it('returns 409 when oauth config is missing', async () => {
+      const miniApp = express();
+      miniApp.use('/oauth', createControlRouter(store, () => undefined));
+      const miniServer = miniApp.listen(0);
+      const { port } = miniServer.address() as { port: number };
+      const res = await fetch(`http://localhost:${port}/oauth/issue`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'cx' })
+      });
+      expect(res.status).toBe(409);
+      miniServer.close();
+    });
   });
 
   describe('POST /oauth/reset', () => {
