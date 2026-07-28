@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/dwmkerr/mock-llm/graph/badge.svg?token=0GvcoTYVY4)](https://codecov.io/gh/dwmkerr/mock-llm)
 [![All Contributors](https://img.shields.io/github/all-contributors/dwmkerr/mock-llm?color=ee8449&style=flat-square)](#contributors)
 
-Simple OpenAI compatible Mock API server. Useful for deterministic testing of AI applications.
+Mock common AI protocols such as OpenAI completions, responses, MCP, A2A. Test different scenarios, error scenarios, authentication and more, with a friendly YAML structure to define the shape of responses.
 
 ## Introduction
 
