@@ -50,6 +50,14 @@ spec:
           env:
             - name: PORT
               value: {{ .Values.service.port | quote }}
+            {{- if .Values.tls.enabled }}
+            - name: MOCK_LLM_TLS_ENABLED
+              value: "true"
+            - name: MOCK_LLM_TLS_CERT
+              value: /etc/mock-llm/tls/tls.crt
+            - name: MOCK_LLM_TLS_KEY
+              value: /etc/mock-llm/tls/tls.key
+            {{- end }}
             {{- if .Values.ark.a2a.enabled }}
             {{- if .Values.ark.a2a.agentCardHost }}
             - name: AGENT_CARD_HOST
@@ -60,17 +68,26 @@ spec:
               value: {{ .Values.ark.a2a.agentCardPort | quote }}
             {{- end }}
             {{- end }}
+          {{- /*
+            When TLS is enabled, force probes onto HTTPS by merging `scheme:
+            HTTPS` into each probe's httpGet block. When disabled, emit probes
+            as configured.
+          */}}
+          {{- $tlsScheme := dict }}
+          {{- if .Values.tls.enabled }}
+          {{- $tlsScheme = dict "httpGet" (dict "scheme" "HTTPS") }}
+          {{- end }}
           {{- with .Values.startupProbe }}
           startupProbe:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml (mergeOverwrite (deepCopy .) $tlsScheme) | nindent 12 }}
           {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml (mergeOverwrite (deepCopy .) $tlsScheme) | nindent 12 }}
           {{- end }}
           {{- with .Values.readinessProbe }}
           readinessProbe:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml (mergeOverwrite (deepCopy .) $tlsScheme) | nindent 12 }}
           {{- end }}
           {{- with .Values.resources }}
           resources:
@@ -83,6 +100,11 @@ spec:
               subPath: mock-llm.yaml
               readOnly: true
             {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /etc/mock-llm/tls
+              readOnly: true
+            {{- end }}
             {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -91,6 +113,11 @@ spec:
         - name: config
           configMap:
             name: {{ .Values.existingConfigMap | default (include "mock-llm.fullname" .) }}
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.tls.existingSecret | default (printf "%s-tls" (include "mock-llm.fullname" .)) }}
         {{- end }}
         {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}

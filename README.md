@@ -25,6 +25,7 @@ The server can be configured to provide different responses based on the input, 
     - [Streaming Configuration](#streaming-configuration)
 - [MCP (Model Context Protocol) Mocking](#mcp-model-context-protocol-mocking)
 - [MCP OAuth Emulation](#mcp-oauth-emulation)
+- [HTTPS / TLS](#https--tls)
 - [A2A (Agent to Agent Protocol) Mocking](#a2a-agent-to-agent-protocol-mocking)
 - [Deploying to Kubernetes with Helm](#deploying-to-kubernetes-with-helm)
 - [Examples](#examples)
@@ -303,6 +304,31 @@ Mock-LLM exposes MCP servers and tools which support testing the MCP protocol, d
 ## MCP OAuth Emulation
 
 Mock-LLM can also emulate an OAuth 2.1 authorization server in front of its MCP endpoint, so you can test OAuth-protected MCP servers end-to-end without depending on a real IdP. It serves RFC 8414 / RFC 9728 discovery, RFC 7591 Dynamic Client Registration, Authorization Code + PKCE, and refresh-token flows, plus a small set of control endpoints for test orchestration. See the [MCP OAuth Documentation](docs/mcp-oauth.md).
+
+## HTTPS / TLS
+
+Mock-LLM serves plain HTTP by default. Enable HTTPS when a consumer needs real TLS — for example the Go MCP SDK, which enforces HTTPS on OAuth discovery URLs per RFC 8414 / RFC 9728. See the [TLS Documentation](docs/tls.md) for the full story.
+
+Mock-LLM never generates or discovers certificates itself — the caller points it at PEM files. Three ways to pass paths, in priority order:
+
+| Source | Keys |
+|---|---|
+| Environment variables | `MOCK_LLM_TLS_ENABLED=true`, `MOCK_LLM_TLS_CERT`, `MOCK_LLM_TLS_KEY` |
+| Config file (`mock-llm.yaml`) | `tls.enabled`, `tls.certPath`, `tls.keyPath` |
+
+The Helm chart generates a self-signed cert via Helm's built-in `genSelfSignedCert` and sets the env vars automatically:
+
+```bash
+helm install mock-llm oci://ghcr.io/dwmkerr/charts/mock-llm \
+  --set tls.enabled=true
+```
+
+This creates:
+
+- `Secret {fullname}-tls` — `tls.crt` + `tls.key`, mounted into the pod.
+- `ConfigMap {fullname}-ca` — `ca.crt` only, consumable as a trust bundle (e.g. via `SSL_CERT_FILE`).
+
+Bring-your-own-cert (cert-manager, etc.): set `tls.existingSecret` + `tls.existingCAConfigMap`.
 
 ## A2A (Agent to Agent Protocol) Mocking
 
