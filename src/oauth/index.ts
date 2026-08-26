@@ -1,6 +1,12 @@
 import express from 'express';
 import { mcpAuthRouter } from '@modelcontextprotocol/sdk/server/auth/router.js';
 import { requireBearerAuth } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
+import { authorizationHandler } from '@modelcontextprotocol/sdk/server/auth/handlers/authorize.js';
+import { tokenHandler } from '@modelcontextprotocol/sdk/server/auth/handlers/token.js';
+import { clientRegistrationHandler } from '@modelcontextprotocol/sdk/server/auth/handlers/register.js';
+import { metadataHandler } from '@modelcontextprotocol/sdk/server/auth/handlers/metadata.js';
+import type { OAuthServerProvider } from '@modelcontextprotocol/sdk/server/auth/provider.js';
+import type { OAuthMetadata, OAuthProtectedResourceMetadata } from '@modelcontextprotocol/sdk/shared/auth.js';
 import { Config } from '../config';
 import { OAuthStore } from './store';
 import { OAuthConfig } from './types';
@@ -20,6 +26,69 @@ function resolveIssuer(initialOAuth: OAuthConfig | undefined, host: string, port
   }
   const safeHost = host === '0.0.0.0' || host === '::' ? 'localhost' : host;
   return new URL(`http://${safeHost}:${port}/`);
+}
+
+// Build RFC 8414 authorization server metadata matching the SDK's
+// createOAuthMetadata output shape. Kept in sync with the SDK by structural
+// parity tests in index.spec.ts.
+function buildAuthorizationServerMetadata(
+  issuerUrl: URL,
+  provider: OAuthServerProvider,
+  scopesSupported: string[]
+): OAuthMetadata {
+  const registrationEnabled = Boolean(provider.clientsStore.registerClient);
+  return {
+    issuer: issuerUrl.href,
+    authorization_endpoint: new URL('/authorize', issuerUrl).href,
+    response_types_supported: ['code'],
+    code_challenge_methods_supported: ['S256'],
+    token_endpoint: new URL('/token', issuerUrl).href,
+    token_endpoint_auth_methods_supported: ['client_secret_post'],
+    grant_types_supported: ['authorization_code', 'refresh_token'],
+    scopes_supported: scopesSupported,
+    registration_endpoint: registrationEnabled ? new URL('/register', issuerUrl).href : undefined
+  };
+}
+
+function mountInsecureOAuthRouter(
+  app: express.Express,
+  provider: OAuthServerProvider,
+  issuerUrl: URL,
+  resourceServerUrl: URL,
+  scopesSupported: string[],
+  resourceName: string
+): void {
+  const authorizationServerMetadata = buildAuthorizationServerMetadata(
+    issuerUrl,
+    provider,
+    scopesSupported
+  );
+  const protectedResourceMetadata: OAuthProtectedResourceMetadata = {
+    resource: resourceServerUrl.href,
+    authorization_servers: [authorizationServerMetadata.issuer],
+    scopes_supported: scopesSupported,
+    resource_name: resourceName
+  };
+
+  const rsPath = new URL(resourceServerUrl.href).pathname;
+  app.use(
+    `/.well-known/oauth-protected-resource${rsPath === '/' ? '' : rsPath}`,
+    metadataHandler(protectedResourceMetadata)
+  );
+  app.use('/.well-known/oauth-authorization-server', metadataHandler(authorizationServerMetadata));
+
+  app.use('/authorize', authorizationHandler({ provider, rateLimit: false }));
+  app.use('/token', tokenHandler({ provider, rateLimit: false }));
+  if (authorizationServerMetadata.registration_endpoint) {
+    app.use(
+      '/register',
+      clientRegistrationHandler({
+        clientsStore: provider.clientsStore,
+        rateLimit: false,
+        clientIdGeneration: false
+      })
+    );
+  }
 }
 
 export function setupOAuth(
@@ -45,18 +114,24 @@ export function setupOAuth(
     issuerUrl
   ).href;
 
-  // Mount SDK OAuth router (authorize, token, register, well-known). Rate limits disabled
-  // for deterministic testing.
-  app.use(mcpAuthRouter({
-    provider,
-    issuerUrl,
-    resourceServerUrl,
-    scopesSupported,
-    resourceName,
-    authorizationOptions: { rateLimit: false },
-    tokenOptions: { rateLimit: false },
-    clientRegistrationOptions: { rateLimit: false, clientIdGeneration: false }
-  }));
+  // The SDK's mcpAuthRouter rejects non-HTTPS, non-loopback issuers at boot.
+  // Kubernetes cluster DNS (e.g. http://mock-llm.ns.svc.cluster.local:6556) is
+  // neither, so when the fixture opts in we mount the SDK's exported handlers
+  // directly with metadata we build ourselves.
+  if (initialOAuth?.metadata?.allowInsecureIssuer) {
+    mountInsecureOAuthRouter(app, provider, issuerUrl, resourceServerUrl, scopesSupported, resourceName);
+  } else {
+    app.use(mcpAuthRouter({
+      provider,
+      issuerUrl,
+      resourceServerUrl,
+      scopesSupported,
+      resourceName,
+      authorizationOptions: { rateLimit: false },
+      tokenOptions: { rateLimit: false },
+      clientRegistrationOptions: { rateLimit: false, clientIdGeneration: false }
+    }));
+  }
 
   // Dynamic Bearer gate: only challenges when current config lists the path.
   const gate = requireBearerAuth({ verifier: provider, resourceMetadataUrl });

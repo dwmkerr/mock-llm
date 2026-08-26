@@ -447,6 +447,8 @@ chainsaw test ./tests/my-test \
   --values image.repository=mock-llm,image.tag=local,image.pullPolicy=Never
 ```
 
+When mock-llm acts as an OAuth fixture inside the cluster, the issuer is a cluster DNS name (not HTTPS, not loopback) which the MCP SDK rejects by default. Opt in with `metadata.allowInsecureIssuer: true` — see [Insecure issuer mode](docs/mcp-oauth.md#insecure-issuer-mode-test-fixtures-only) for a values.yaml example.
+
 ## Samples
 
 Each sample below is in the form of an extremely minimal script that shows:
